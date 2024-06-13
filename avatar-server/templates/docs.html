@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        body{
+            background-image: url(../static/images/bg.png);            
+            background-repeat: no-repeat;
+            background-size: cover;
+            /* background-position: center; */
+            /* opacity: 0.5; */
+        }
+    </style>
+
+</head>
+<body>
+    
+    <div style="text-align: center;">
+
+        <h1 style="color: red;">링크 누르면 동작합니다</h1>
+        <br><br>
+
+        <h1>Default Redstar icon</h1>
+        <a style="color: #00FFFF;" href="https://a.redstar.moe">https://a.redstar.moe (-1.png)</a>
+        <br><br><br><br>
+
+        <h1>Redstar user icon</h1>
+        <a style="color: #00FFFF;" id="redstaruserid" href="https://a.redstar.moe/<int:uid>">https://a.redstar.moe/{Redstar user ID}</a>
+        <br><br><br><br>
+
+        <h1>Bancho icon Get 1 (ID)</h1>
+        <a style="color: #00FFFF;" id="banchouserid" href="https://a.redstar.moe/bancho/id/<int:uid>">https://a.redstar.moe/bancho/id/{Bancho user ID}</a>
+        <br><br><br><br>
+
+        <h1>Bancho icon Get 2 (Username, ID)</h1>
+        <a style="color: #00FFFF;" id="banchousername" href="https://a.redstar.moe/bancho/u/<string:uid>">https://a.redstar.moe/bancho/u/{Bancho username, Bancho usre ID}</a>
+
+    </div>
+
+    <script src="../static/js/docs.js"></script>
+
+</body>
+</html>

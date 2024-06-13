@@ -1,0 +1,383 @@
+{{ define "tpl" }}
+  <link rel="stylesheet" href="/static/css/pages/leaderboard.css" />
+  <div class="ui container">
+    {{ $ := . }}
+    {{ if ne .Beatmapset.ID 0 }}
+      <div class="ui floating icon labeled dropdown button" id="diff-menu">
+        <i class="fa-solid fa-caret-down icon"></i>
+        <span class="text">
+          <img
+            src="/static/images/modes/{{ .Beatmap.Mode }}.png"
+            class="modes-icons" />
+          {{ .Beatmap.DiffName }} (
+          <i class="fa-solid fa-star" style="margin-right: 0"></i>
+          {{ printf "%.2f" .Beatmap.DifficultyRating }})
+        </span>
+        <div class="menu">
+          {{ range .Beatmapset.ChildrenBeatmaps }}
+            <a
+              href="/b/{{ .ID }}"
+              class="item {{ if eq .ID $.Beatmap.ID }}active{{ end }}"
+              data-bid="{{ .ID }}">
+              <img
+                src="/static/images/modes/{{ .Mode }}.png"
+                class="modes-icons" />
+              {{ .DiffName }} (
+              <i class="fa-solid fa-star icon" style="margin-right: 0"></i>
+              {{ printf "%.2f" .DifficultyRating }})
+            </a>
+          {{ end }}
+        </div>
+      </div>
+
+      <div class="ui segments">
+        <div class="ui segment">
+          <div class="ui four column divided stackable grid">
+            <div class="row">
+              <div class="column">
+                <b>{{ $.T "Artist" }}:</b>
+                {{ .Beatmapset.Artist }}
+                <br />
+                <b>{{ $.T "Title" }}:</b>
+                {{ .Beatmapset.Title }}
+                <br />
+                <b>{{ $.T "Creator" }}:</b>
+                {{ .Beatmapset.Creator }}
+                <br />
+                <b>{{ $.T "Source" }}:</b>
+                {{ .Beatmapset.Source }}
+                <br />
+
+                <!-- 원래 hanayo 소스 -->
+                <br>
+                <script>
+                  const diffmenu = document.getElementById("diff-menu")
+                  let orginBid = Number(window.location.pathname.replace("/b/", ""))
+
+                  function IsChangeBeatmap() {
+                    const bid = Number(window.location.pathname.replace("/b/", ""))
+                    if (orginBid !== bid) {
+                      orginBid = Number(window.location.pathname.replace("/b/", ""))
+                      RS()
+                    }
+                  }
+
+                  diffmenu.addEventListener("click", IsChangeBeatmap)
+                  window.addEventListener("load", RS)
+
+                  function RS() {
+                    const RB = document.getElementById("ranked?by")
+                    const RSR = document.getElementById("redstar_ranked_status")
+                    const RSB = document.getElementById("bancho_ranked_status")
+                    RB.style.color = "red"; RB.href = "https://admin.redstar.moe/frontend/ranked_status/" + orginBid; RB.innerText = "wait a sec...";
+                    RSR.style.color = "red"; RSR.href = "https://admin.redstar.moe/frontend/ranked_status/" + orginBid; RSR.innerText = "wait a sec...";
+                    RSB.style.color = "red"; RSB.href = "https://admin.redstar.moe/frontend/ranked_status/" + orginBid; RSB.innerText = "wait a sec...";
+
+                    const Http_ranked_status = new XMLHttpRequest();
+                    const url_ranked_status = "https://admin.redstar.moe/frontend/ranked_status/" + orginBid;
+                    Http_ranked_status.open('GET', url_ranked_status);
+                    Http_ranked_status.send();
+                    Http_ranked_status.onreadystatechange = (e) => {
+                      const ranked_status = JSON.parse(Http_ranked_status.response)
+                      console.log(ranked_status)
+
+                      if (ranked_status["redstar"] !== null) {
+                        RB.innerText = ranked_status["redstar"][0]
+                        if (ranked_status["redstar"][0] !== "Bancho") {
+                          RB.href = "https://redstar.moe/u/" + ranked_status["redstar"][0]
+                          RB.style.color = "aqua"
+                        }
+                        else {
+                          RB.href = "https://osu.ppy.sh/b/" + orginBid
+                          RB.style.color = "pink"
+                        }
+                      }
+                      else {
+                        RB.innerText = JSON.stringify(null)
+                      }
+
+                      if (ranked_status["redstar"] !== null) {
+                        RSR.innerText = JSON.stringify(ranked_status["redstar"].slice(1))
+                        if (ranked_status["redstar"][2] === 2) {
+                          RSR.style.color = "#6777ef" //Ranked
+                        }
+                        if (ranked_status["redstar"][2] === 5) {
+                          RSR.style.color = "#AA336A" //Loved
+                        }
+                        if (ranked_status["redstar"][2] === 3) {
+                          RSR.style.color = "green" //Approved
+                        }
+                        if (ranked_status["redstar"][2] === 4) {
+                          RSR.style.color = "green" //Qualified
+                        }
+                        if (ranked_status["redstar"][2] === 0) {
+                          RSR.style.color = "grey" //Unranked
+                        }
+                      }
+                      else {
+                        RSR.innerText = JSON.stringify(null)
+                      }
+                      if (ranked_status["bancho"] !== null) {
+                        RSB.innerText = JSON.stringify(ranked_status["bancho"])
+                        if (ranked_status["bancho"][1] === 1) {
+                          RSB.style.color = "#6777ef" //Ranked
+                        }
+                        if (ranked_status["bancho"][1] === 4) {
+                          RSB.style.color = "#AA336A" //Loved
+                        }
+                        if (ranked_status["bancho"][1] === 2) {
+                          RSB.style.color = "green" //Approved
+                        }
+                        if (ranked_status["bancho"][1] === 3) {
+                          RSB.style.color = "green" //Qualified
+                        }
+                        if (ranked_status["bancho"][1] === 0) {
+                          RSB.style.color = "grey" //Pending (Unranked)
+                        }
+                        if (ranked_status["bancho"][1] === -1) {
+                          RSB.style.color = "grey" //WIP (Unranked)
+                        }
+                        if (ranked_status["bancho"][1] === -2) {
+                          RSB.style.color = "grey" //Graveyard (Unranked)
+                        }
+                      }
+                      else {
+                        RSB.innerText = JSON.stringify(null)
+                      }
+                    };
+                  }
+                  </script>
+
+                  <b style="color: yellow;">{{ $.T "Rankedby" }} : </b>
+                  <a id="ranked?by" style="color: red;" target="_blank" href="https://admin.redstar.moe/frontend/ranked_status/{{ .Beatmap.ID }}">wait a sec...</a>
+                  <br>
+                  <b style="color: yellow;">{{ $.T "Redstar_Ranked_status" }} : </b>
+                  <a id="redstar_ranked_status" style="color: red;" target="_blank" href="https://admin.redstar.moe/frontend/ranked_status/{{ .Beatmap.ID }}">wait a sec...</a>
+                  <br>
+                  <b style="color: yellow;">{{ $.T "Bancho_Ranked_status" }} : </b>
+                  <a id="bancho_ranked_status" style="color: red;" target="_blank" href="https://admin.redstar.moe/frontend/ranked_status/{{ .Beatmap.ID }}">wait a sec...</a>
+                  <br>
+                <!-- 원래 hanayo 소스 끝 -->
+
+              </div>
+              <div class="column">
+                <b>{{ $.T "Circle Size" }}:</b>
+                <span id="cs"></span>
+                <br />
+                <b>{{ $.T "HP Drain" }}:</b>
+                <span id="hp"></span>
+                <br />
+                <b>{{ $.T "Overall Difficulty" }}:</b>
+                <span id="od"></span>
+                <br />
+                <b>{{ $.T "Passes/Plays" }}:</b>
+                <span id="passcount"></span>
+                /
+                <span id="playcount"></span>
+              </div>
+              <div class="column">
+                <b>{{ $.T "Approach Rate" }}:</b>
+                <span id="ar"></span>
+                <br />
+                <b>{{ $.T "Star Difficulty" }}:</b>
+                <span id="stars"></span>
+                <br />
+                <b>{{ $.T "Length" }}:</b>
+                <span id="length"></span>
+                (
+                <span id="drainLength"></span>
+                drain)
+                <br />
+                <b>{{ $.T "BPM" }}:</b>
+                <span id="bpm"></span>
+                <br />
+              </div>
+              <div class="full-centered column">
+                <div class="ui vertical buttons">
+
+                  <!-- 원래 hanayo 소스 -->
+                  <a onclick="togglePlay()" class="ui blue labeled icon button">
+                    <i id="imageplay" class="play icon"></i>
+                    <span id="PlayState">
+                      Play Song
+                    </span>
+                  </a>
+                  <a class="ui blue labeled icon button">
+                    <i id="imageplay2" class="play icon"></i>
+                    <span id="current_time" style="color: red;">								
+                      &#11014 wait a sec...
+                    </span>
+                  </a>
+                  
+                  <a href="osu://b/{{ .Beatmap.ID }}" class="ui pink labeled icon button"><i class="download icon"></i>{{ $.T "osu!direct" }}</a>
+                  <!-- <a href="http://storage.bigtu.vip/d/{{ .Beatmapset.ID }}" class="ui green labeled icon button"><i class="download icon"></i>{{ $.T "download" }}</a> -->
+                  <a href="https://redstar.moe/d/{{ .Beatmapset.ID }}" class="ui green labeled icon button"><i class="download icon"></i>{{ $.T "download" }}</a>
+                  {{ if .Beatmapset.HasVideo }}
+                    <!-- <a href="http://storage.bigtu.vip/d/{{ .Beatmapset.ID }}?novideo" class="ui gray labeled icon button"><i class="download icon"></i>{{ $.T "download (no video)" }}</a> -->
+                    <a href="https://redstar.moe/d/{{ .Beatmapset.ID }}?novideo" class="ui gray labeled icon button"><i class="download icon"></i>{{ $.T "download (no video)" }}</a>
+                    {{ end }}
+                  {{ if has $.Context.User.Privileges 256 }}
+                    <!-- <a href="https://old.bigtu.vip/index.php?p=124&bsid={{ .Beatmapset.ID }}" class="ui violet labeled icon button"><i class="thumbs up icon"></i>{{ $.T "Rank in RAP"}}</a> -->
+                    <a href="https://old.redstar.moe/index.php?p=124&bsid={{ .Beatmapset.ID }}" class="ui violet labeled icon button"><i class="thumbs up icon"></i>{{ $.T "Rank in RAP"}}</a>
+                    {{ end }}
+  
+  
+                    {{ if has $.Context.User.Privileges 267 }}
+                    <!-- <a href="https://old.bigtu.vip/index.php?p=124&bsid={{ .Beatmapset.ID }}" class="ui violet labeled icon button"><i class="thumbs up icon"></i>{{ $.T "Rank in RAP"}}</a> -->
+                    <a target="_blank" href="https://admin.redstar.moe/rank/{{ .Beatmap.ID }}" class="ui yellow labeled icon button"><i class="folder open icon"></i>{{ $.T "Manage Beatmap"}}</a>
+                    {{ end }}
+                    
+                    <a target="_blank" href="https://osu.ppy.sh/b/{{ .Beatmap.ID }}" class="ui pink labeled icon button"><i class="play icon"></i>{{ $.T "View On Bancho" }}</a>
+  
+                    <a target="_blank" href="https://preview.nerinyan.moe/#{{ .Beatmap.ID }}" class="ui violet labeled icon button"><i class="play icon"></i>{{ $.T "Preview Beatmap" }}</a>
+                    <a target="_blank" href="https://osu.pages.dev/preview#{{ .Beatmap.ID }}" class="ui violet labeled icon button"><i class="play icon"></i>{{ $.T "Preview Beatmap2" }}</a>
+                    <!-- 원래 hanayo 소스 끝 -->
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <audio id="BeatmapAudio">
+        <!-- <source src="https://b.ppy.sh/preview/{{ .Beatmapset.ID }}.mp3" type="audio/mp3"> -->
+        <!-- <source id="song_source" src="https://catboy.best/preview/audio/{{ .Beatmap.ID }}" type="audio/mp3"> -->
+        <source id="song_source" src="https://b.redstar.moe/preview/{{ .Beatmapset.ID }}.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+      </audio>
+
+
+      <script>
+        {{ $p := .Gin.Query "p" }}
+        {{ $curMode := atoi (.Gin.Query "mode") }}
+        {{ $relax := atoi (.Gin.Query "rx") }}
+        {{ $favModeRaw := .Get "users/self/favourite_mode" }}
+        var beatmapID = {{ .Beatmap.ID }};
+        var setData = JSON.parse({{ .SetJSON }});
+        var page = {{ $p | atoint | atLeastOne }};
+        // defaults to 0
+        var currentMode = {{ $curMode }};
+        var currentCmode = parseInt({{ $relax }}) || 0;
+        var currentModeChanged = false;
+        var currentCmodeChanged = false;
+        var favMode = parseInt({{ $favModeRaw.favourite_mode }}) || 0;
+
+
+
+        //for playing and stopping bmap music
+        var audio = document.getElementById("BeatmapAudio");
+        
+        audio.addEventListener('loadedmetadata', () => {
+          document.getElementById("current_time").innerText = `0.0 / ${Math.round(audio.duration * 10) / 10}`
+          document.getElementById("current_time").style.color = ""
+        });
+        /* 현재 오디오 플레이 정보 */
+        audio.addEventListener("timeupdate", function(){
+          document.getElementById("current_time").innerText = `${Math.round(audio.currentTime * 10) / 10} / ${Math.round(audio.duration * 10) / 10}`
+        });
+        audio.addEventListener("ended", function(){
+          document.getElementById("current_time").innerText = `0 / ${Math.round(audio.duration * 10) / 10}`
+        });
+
+
+        /* Realistik Server Code */
+        var PlayText = 'Play Song'
+        var PauseText = 'Pause Song'
+        var isPlaying = false;
+
+        audio.volume = 0.2;
+
+        function togglePlay() {
+          if (isPlaying) {
+            audio.pause()
+            document.getElementById("PlayState").innerHTML = PlayText;
+            document.getElementById("imageplay").classList.remove('pause');
+            document.getElementById("imageplay").classList.add('play');
+
+            document.getElementById("imageplay2").classList.remove('pause');
+            document.getElementById("imageplay2").classList.add('play');
+          } else {
+            console.log(`Audio Volume = ${audio.volume}`)
+
+            audio.play();
+            document.getElementById("PlayState").innerHTML = PauseText;
+            document.getElementById("imageplay").classList.remove('play');
+            document.getElementById("imageplay").classList.add('pause');
+
+            document.getElementById("imageplay2").classList.remove('play');
+            document.getElementById("imageplay2").classList.add('pause');
+          }
+        };
+        audio.onplaying = function() {
+          isPlaying = true;
+        };
+        audio.onpause = function() {
+          isPlaying = false;
+        };
+
+        audio.addEventListener("ended", function(){
+          audio.currentTime = 0;
+          document.getElementById("PlayState").innerHTML = PlayText;
+          document.getElementById("imageplay").classList.remove('pause');
+          document.getElementById("imageplay").classList.add('play');
+
+          document.getElementById("imageplay2").classList.remove('pause');
+          document.getElementById("imageplay2").classList.add('play');
+        });
+      </script>
+
+      <div class="akat-box ui segment">
+        <div class="ui grid stackable">
+
+          <div class="five wide column" id="rx-column">
+            <div class="ui three item menu" id="cmode-menu">
+              {{ range $k, $v := cmodes }}
+                <a
+                  class="item"
+                  id="cmode-{{ $k }}"
+                  data-cmode="{{ $k }}"
+                  href="/b/{{ $.Beatmap.ID }}?mode={{ $curMode }}&rx={{ $k }}">
+                  {{ $v }}
+                </a>
+              {{ end }}
+            </div>
+          </div>
+
+          <div class="eleven wide column" id="mode-column">
+            <div class="ui four item menu" id="mode-menu">
+              {{ range $k, $v := modes }}
+                <a
+                  class="item"
+                  id="mode-{{ $k }}"
+                  data-mode="{{ $k }}"
+                  href="/b/{{ $.Beatmap.ID }}?mode={{ $k }}&rx={{ $relax }}">
+                  {{ $v }}
+                </a>
+              {{ end }}
+            </div>
+          </div>
+
+        </div>
+
+        <table class="ui table sortable leaderboard-table">
+          <thead>
+            <tr>
+              <th class="t-heading center aligned">{{ .T "Rank" }}</th>
+              <th class="t-heading center aligned width-30 disabled"></th>
+              <th class="t-heading center aligned">{{ .T "Grade" }}</th>
+              <th class="t-heading center aligned">{{ .T "Score" }}</th>
+              <th class="t-heading center aligned">{{ .T "Accuracy" }}</th>
+              <th class="t-heading center aligned">{{ .T "Combo" }} ({{ .Beatmap.MaxCombo }})</th>
+              <th class="t-heading center aligned">{{ .T "PP" }}</th>
+              <th class="t-heading center aligned disabled">{{ .T "Mods" }}</th>
+              <th class="t-heading center aligned">{{ .T "Time" }}</th>
+              <th class="t-heading center aligned disabled">{{ .T "Replay" }}</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    {{ end }}
+  </div>
+{{ end }}

@@ -1,0 +1,1 @@
+SELECT pp, beatmap_md5 FROM scores_relax WHERE userid = 1006 AND play_mode = 0 AND completed = 3 ORDER BY pp DESC LIMIT 500;

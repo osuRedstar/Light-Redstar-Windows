@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>I Love Debian!</title>
+
+    <script type="text/javascript">
+
+        alert("현재 스위처와 opentablet driver를 같이 사용하면 타블렛이 동작하지 않습니다. -devserver 방식을 사용하여 접속해 주십시오!!! \n모르겠으면 비디오 보시면 됩니다. \n\nThe tablet does not work if the current switcher and opentablet driver are used together. Please connect using the -devserver method!!! \nIf you don't know, you can watch the video.");
+        
+    </script>
+    
+</head>
+<body style="background: pink;">
+
+    <script>
+        alert('Debian 스위처 수정버전 업로드 하였으니 다운로드 하세요! \n\nI uploaded the modified version of Debian switcher, so download it!')
+    </script>
+    
+    <!-- <div style="text-align: center; margin: 20px; text-decoration: line-through;"> -->
+    <div style="text-align: center; margin: 20px;">
+        <video width="853.333" height="480" controls src="./how to use -devserver.mp4"></video>
+    </div>
+
+    <!-- <div style="margin: 0px; text-decoration: line-through;"> -->
+    <div style="margin: 0px;">s
+        <h1 style="color: purple; text-align: center;">오스 바로가기 만드시고 -devserver redstar.moe 를 입력하고 들어오세요.</h1>
+        <!-- <br> -->
+        <h1 style="color: purple; text-align: center;">Create an osu shortcut, enter -devserver redstar.moe, and come in.</h1>
+    </div>
+
+
+    <div>
+        <h1 style="color: purple; text-align: center;">스위처는 오스 바로가기 만들어서 접속하는거랑 원리가 같습니다!!</h1>
+        <h1 style="color: purple; text-align: center;">The switcher has the same principle as making a shortcut to osu and connecting it!!</h1>
+    </div>
+
+
+    <button id="Novah" onclick="switcherDownload()">
+        Download Switcher
+    </button>
+    
+    <script>
+        let width = innerWidth
+        const btnStyle = document.getElementById("Novah").style
+        
+        btnStyle.marginLeft = (width / 2) - 41.2
+        btnStyle.border = 0
+        btnStyle.background = "#9370DB"
+        btnStyle.display = "block"
+        btnStyle.margin = "20px auto"
+        btnStyle.textAlign = "center"
+        btnStyle.border = "4px solid #FF0000"
+        btnStyle.padding = "14px 80px"
+        btnStyle.outline = "none"
+        btnStyle.color = "yellow"
+        btnStyle.borderRadius = "24px"
+        btnStyle.transition = "0.25s"
+        btnStyle.cursor = "pointer"
+        document.getElementById("Novah").addEventListener("mouseenter", () => {
+            btnStyle.background = "#FF0000"
+        })
+        document.getElementById("Novah").addEventListener("mouseleave", () => {
+            btnStyle.background = "#9370DB"
+        })
+
+        function switcherDownload() {
+            window.open("./Novah - RedstarOSU.exe", "_blank");
+        }
+
+    </script>
+    
+</body>
+</html>

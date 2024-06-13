@@ -1,0 +1,29 @@
+1. 라우팅 및 원격 엑세스(VPN) 끄기. (443포트 사용함)
+
+2. xampp 서버 4개 다 켜기 (Apache, MySQL, FileZilla, Mercury)
+
+3. discord.redstar.moe
+4. nginx
+5. 라우팅 및 원격 엑세스(VPN) 다시 켜기. (443포트 사용함)
+6. redis
+7. RealistikPanel
+8. cheesegull
+9. lets.py
+10. pep.py
+11. avatarserver.py
+12. API
+13. Frontend
+14. mediaserver
+??. lazer?
+
+15. filebrowser
+16. Realistik API
+17. hanayo
+18. osu-discord-webhook
+19. 초보의 봇
+20. discord.aodd.moe
+
+(다른 windows 계정)
+1. twitch - 스트리머들 채팅 연결 전부 켜기, 마크 서버 2개 켜기, discord.collabo.lol, 루티봇, 루티봇 음악봇
+2. Lemres - kr.catboy.best 서버 2개 켜기 (내가 안켬)
+3. seongpo - 급식서버, 급식서버 디코봇 켜기

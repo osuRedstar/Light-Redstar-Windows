@@ -1,0 +1,21 @@
+[submodule "cheesegull"]
+	path = cheesegull
+	url = https://github.com/osuRedstar/cheesegull.git
+[submodule "cron"]
+	path = cron
+	url = https://github.com/osuRedstar/Redstar-Cron.py.git
+[submodule "mediaserver"]
+	path = mediaserver
+	url = https://github.com/osuRedstar/osu-media-server
+[submodule "discord.redstar.moe"]
+	path = discord.redstar.moe
+	url = https://github.com/osuRedstar/DiscordOauth2Join
+[submodule "lets/common"]
+	path = lets/common
+	url = https://github.com/osuRedstar/common
+[submodule "pep.py/common"]
+	path = pep.py/common
+	url = https://github.com/osuRedstar/common
+[submodule "RealistikPanel"]
+	path = RealistikPanel
+	url = https://github.com/osuRedstar/RealistikPanel
