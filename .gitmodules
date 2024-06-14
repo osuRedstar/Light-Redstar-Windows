@@ -3,7 +3,7 @@
 	url = https://github.com/osuRedstar/cheesegull
 [submodule "cron"]
 	path = cron
-	url = https://github.com/osuRedstar/Redstar-Cron.py.git
+	url = https://github.com/osuRedstar/Redstar-cron.py
 [submodule "mediaserver"]
 	path = mediaserver
 	url = https://github.com/osuRedstar/osu-media-server
