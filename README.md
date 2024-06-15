@@ -20,8 +20,8 @@
 
 ## Nginx
 
-- nginx 폴더에 temp 폴더가 없으므로 nginx를 다시 다운로드하여 temp 폴더를 얻어주세요.
-    - Since there is no temp folder in the nginx folder, download nginx again and get the temp folder.
+- nginx 폴더에 temp, logs 폴더가 없으므로 temp, logs 폴더를 생성해주세요.
+    - There are no temp, logs folders in the nginx folder, so please create temp, logs folders.
 - nginx.conf, nginx2.conf(추가기능)을 당신의 맞게 수정하세요
     - Modify nginx.conf, nginx2.conf (additional functions) to suit your needs.
 - ~~(이 컴퓨터에서는 nginx를 사용하지 않고, 서버 컴퓨터에 있는 nginxTS.conf 파일로 테스트 서버를 열어보겠습니다.)~~
@@ -54,8 +54,8 @@
 
 ## Lets
 
-- 해당 경로를 바꿔서 oppai가 정상적으로 실행되게 하세요
-    - Change the path to allow oppai to run normally.
+- 해당 경로를 바꿔서 oppai가 정상적으로 실행되게 하세요 (TODO: Delete This Text)
+    - Change the path to allow oppai to run normally. (TODO: Delete This Text)
 
 ---
 
