@@ -649,52 +649,15 @@ def tillerinoNp(fro, chan, message):
 
 		# Get beatmap id from URL
 		#beatmapID = fokabot.npRegex.search(beatmapURL).groups(0)[1]
-		by_message = "by /np"
 		try:
-			#https://osu.redstar.moe/beatmapsets/{bsid}#/{bid}
-			beatmapID = fokabot.npRegex.search(beatmapURL).groups(0)[1]
+			beatmapID = fokabot.RGX(beatmapURL)[1]
 			log.info(f"tillerinoNp() beatmapID = {beatmapID}")
 			by_message = "by /np"
 		except:
-			log.debug("npRegex 실패!")
-			try:
-				#https://osu.redstar.moe/b/{bid}
-				beatmapID = fokabot.npRegex2.search(beatmapURL).groups(0)[0]
-				log.info(f"tillerinoNp() with redstar link beatmapID = {beatmapID}")
-				by_message = "by /np(/me) with redstar link"
-			except:
-				log.debug("npRegex2 실패!")
-				try:
-					#https://osu.redstar.moe/beatmapsets/{bsid}
-					beatmapSetID = fokabot.npRegex_custom_beatmap.search(beatmapURL).groups(0)[0]
-					beatmapID = glob.db.fetch("SELECT beatmap_id FROM beatmaps WHERE beatmapset_id = %s and beatmap_id < 0 ORDER BY beatmap_id ASC LIMIT 1", [beatmapSetID])
-					beatmapID = beatmapID["beatmap_id"]
-					log.warning(f"tillerinoNp() with custom Beatmap beatmapID = {beatmapID}")
-					by_message = "by /np with custom Beatmap link"
-				except:
-					log.debug("npRegex_custom_beatmap 실패!")
-					try:
-						#osu://b/{bid}
-						beatmapID = fokabot.npRegex_direct.search(beatmapURL).groups(0)[0]
-						log.info(f"tillerinoNp() with direct link beatmapID = {beatmapID}")
-						by_message = "by /np(/me) with direct link"
-					except:
-						log.debug("npRegex_direct 실패!")
-						try:
-							#https://osu.ppy.sh/beatmapsets/{bsid}#/{bid}
-							beatmapID = fokabot.npRegex_osu.search(beatmapURL).groups(0)[1]
-							log.info(f"tillerinoNp() with Bancho beatmapID = {beatmapID}")
-							by_message = "by /np with Bancho"
-						except:
-							log.debug("npRegex_osu 실패!")
-							try:
-								#https://osu.ppy.sh/b/{bid}
-								beatmapID = fokabot.npRegex2_osu.search(beatmapURL).groups(0)[0]
-								log.info(f"tillerinoNp() with Bancho2 beatmapID = {beatmapID}")
-								by_message = "by /np(/me) with Bancho2"
-							except:
-								log.debug("npRegex2_osu 실패!")
-								log.error(f"npRegex.search 실패!")
+			log.debug("RGX 실패!")
+			beatmapID = fokabot.RGX(beatmapURL)[0]
+			log.info(f"tillerinoNp() beatmapID = {beatmapID}")
+			by_message = "by /np"
 
 		# Update latest tillerino song for current token
 		token = glob.tokens.getTokenFromUsername(fro)

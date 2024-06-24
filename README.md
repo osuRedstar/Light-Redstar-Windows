@@ -9,12 +9,15 @@
 
 ## Domain List
 
-- a.{Your_Domain} (Avatar Server)
-- admin.{Your_Domain} (Admin Panel - Realistik Panel)
-- b.{Your_Domain} (osu!direct thumb img & preview Server) (using RedstarOSU's mediaserver or redirect b.ppy.sh)
-- c.{Your_Domain} (Main Server - Bancho)
-- old.{Your_Domain} (Lets Server - Score Server)
 - osu.{Your_Domain} (osu connect with -devserver option (-devserver {Your_Domain}))
+- admin.{Your_Domain} (Admin Panel - Realistik Panel)
+- assets.{Your_Domain}
+- a.{Your_Domain} (Avatar Server)
+- b.{Your_Domain} (osu!direct thumb img & preview Server) (using RedstarOSU's mediaserver or redirect b.ppy.sh)
+- c.{Your_Domain} (Main Server - Bancho) | (c1~c6, ce).{Your_Domain} (option)
+- cheesegull.{Your_Domain} (cheeesegull)
+- old.{Your_Domain} (Lets Server - Score Server)
+- new.{Your_Domain}
 
 ---
 
@@ -24,8 +27,6 @@
     - There are no temp, logs folders in the nginx folder, so please create temp, logs folders.
 - nginx.conf, nginx2.conf(추가기능)을 당신의 맞게 수정하세요
     - Modify nginx.conf, nginx2.conf (additional functions) to suit your needs.
-- ~~(이 컴퓨터에서는 nginx를 사용하지 않고, 서버 컴퓨터에 있는 nginxTS.conf 파일로 테스트 서버를 열어보겠습니다.)~~
-    - ~~(I will not use nginx on this computer, but will open a test server with the nginxTS.conf file on the server computer.)~~
 
 ---
 
@@ -49,20 +50,6 @@
 
 - config.json을 당신의 맞게 수정하세요
     - Modify config.json to suit your needs
-
----
-
-## Lets
-
-- 해당 경로를 바꿔서 oppai가 정상적으로 실행되게 하세요 (TODO: Delete This Text)
-    - Change the path to allow oppai to run normally. (TODO: Delete This Text)
-
----
-
-## Pep.py
-
-- /np 입력시에 이 값으로 BeatmapID를 추출하기 때문에 꼭 당신의 것으로 바꿔줘야합니다.
-    - When entering /np, the BeatmapID is extracted using this value, so you must change it to your own.
 
 ---
 

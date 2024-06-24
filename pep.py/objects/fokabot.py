@@ -10,19 +10,9 @@ from objects import glob
 from helpers import configHelper
 
 conf = configHelper.config("config.ini")
-server_domain = conf.config["server"]["server-domain"]
-domainRegexed = server_domain.split(".")
 
-# Tillerino np regex, compiled only once to increase performance
-npRegex2_osu = re.compile("^https?:\\/\\/osu\\.ppy\\.sh\\/b\\/(-?\\d+)")
-npRegex_osu = re.compile("^https?:\\/\\/osu\\.ppy\\.sh\\/beatmapsets\\/(-?\\d+)#\\/(-?\\d+)")
-
-npRegex = re.compile("^https?:\\/\\/osu\\.{}\\.{}\\/beatmapsets\\/(-?\\d+)#\\/(-?\\d+)".format(domainRegexed[0], domainRegexed[1]))
-npRegex2 = re.compile("^https?:\\/\\/osu\\.{}\\.{}\\/b\\/(-?\\d+)".format(domainRegexed[0], domainRegexed[1]))
-npRegex_custom_beatmap = re.compile("^https?:\\/\\/osu\\.{}\\.{}\\/beatmapsets\\/(-?\\d+)".format(domainRegexed[0], domainRegexed[1]))
-npRegex_direct = re.compile("^osu?:\\/\\/b\\/(-?\\d+)")
-
-npRegex_BanchoWebLink = re.compile("^https?:\\/\\/osu\\.ppy\\.sh\\/beatmapsets\\/(-?\\d+)#(\\w+)\\/(-?\\d+)")
+npRegex = re.compile("^https?:\\/\\/osu\\.ppy\\.sh\\/beatmapsets\\/(-?\\d+)#\\/(-?\\d+)")
+def RGX(url): return re.findall(r"\d+", url)
 
 def connect(timeOffset = 9):
 	"""
