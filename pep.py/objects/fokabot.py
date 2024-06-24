@@ -13,6 +13,14 @@ conf = configHelper.config("config.ini")
 
 npRegex = re.compile("^https?:\\/\\/osu\\.ppy\\.sh\\/beatmapsets\\/(-?\\d+)#\\/(-?\\d+)")
 def RGX(url): return re.findall(r"\d+", url)
+def npRegex_BanchoWebLink(url):
+	try:
+		mode = re.search(r"#(\w+)/", url).group(1)
+	except:
+		mode = ""
+	bid = re.findall(r"\d+", url)
+	bid = bid[len(bid) - 1]
+	return [mode, bid]
 
 def connect(timeOffset = 9):
 	"""

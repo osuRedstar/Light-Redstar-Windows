@@ -3200,8 +3200,8 @@ def D_dl(fro, chan, message):
 	return f"[osu://s/{message[0]} {message[0]}]"
 
 def BanchoLink_to_mirror(fro, chan, message):
-	mode = fokabot.npRegex_BanchoWebLink.search(message).groups(0)[1]
-	beatmapID = fokabot.npRegex_BanchoWebLink.search(message).groups(0)[2]
+	mode = fokabot.npRegex_BanchoWebLink(message)[0]
+	beatmapID = fokabot.npRegex_BanchoWebLink(message)[1]
 
 	if mode == "osu":
 		mode = "STD"
@@ -3211,6 +3211,8 @@ def BanchoLink_to_mirror(fro, chan, message):
 		mode = "CTB"
 	elif mode == "mania":
 		mode = "Mania"
+	else:
+		mode = "?"
 
 	return f"{mode} | {mirrorMessage(beatmapID)}"
 
@@ -3539,6 +3541,14 @@ commands = [
 		"callback": D_dl
 	}, {
 		"trigger": "https://osu.ppy.sh/beatmapsets/",
+		"callback": BanchoLink_to_mirror,
+		"startswith": True
+	}, {
+		"trigger": "https://osu.ppy.sh/b/",
+		"callback": BanchoLink_to_mirror,
+		"startswith": True
+	}, {
+		"trigger": "https://osu.ppy.sh/s/",
 		"callback": BanchoLink_to_mirror,
 		"startswith": True
 	}
