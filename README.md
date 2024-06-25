@@ -2,10 +2,10 @@
 
 ## requirements.txt
 
-- root folder/requirements.txt
+- rootFolder/requirements.txt
 
 ## Youtube Link
-[![Video Label](http://img.youtube.com/vi/wnIKzEfqkkg/0.jpg)](https://youtu.be/wnIKzEfqkkg)
+[![Video Label](http://img.youtube.com/vi/KDJ9fqeqM30/0.jpg)](https://youtu.be/KDJ9fqeqM30)
 
 ## Domain List
 
