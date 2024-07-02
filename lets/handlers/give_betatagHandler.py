@@ -15,7 +15,7 @@ from common.web import requestsManager
 from common import generalUtils
 from objects import glob
 from common.sentry import sentry
-
+import time
 
 MODULE_NAME = "give_betatagHandler"
 class handler(requestsManager.asyncRequestHandler):
@@ -26,6 +26,7 @@ class handler(requestsManager.asyncRequestHandler):
 	@tornado.gen.engine
 	def asyncGet(self, userID):
 		#ap_stats Table 추가
+		time.sleep(3)
 		try:
 			rx_stats = glob.db.fetch("SELECT * FROM rx_stats WHERE id = %s", [userID])
 			glob.db.execute("INSERT INTO ap_stats VALUES {}".format(tuple(rx_stats.values())))
