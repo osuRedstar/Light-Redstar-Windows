@@ -1,9 +1,9 @@
 [submodule "cheesegull"]
 	path = cheesegull
-	url = https://github.com/osuRedstar/cheesegull
+	url = https://github.com/osuRedstar/cheesegull.git
 [submodule "cron"]
 	path = cron
-	url = https://github.com/osuRedstar/Redstar-cron.py
+	url = https://github.com/osuRedstar/Redstar-Cron.py.git
 [submodule "mediaserver"]
 	path = mediaserver
 	url = https://github.com/osuRedstar/osu-media-server
