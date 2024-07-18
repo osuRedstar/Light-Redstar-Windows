@@ -840,6 +840,7 @@ def tillerinoLast(fro, chan, message, bpp_command = False):
 			data = glob.db.fetch("SELECT song_name as sn from beatmaps WHERE beatmap_md5 = %s", [scoredata["beatmap_md5"]])
 			beatmapdata = glob.db.fetch("""SELECT ranked as beatmap_ranked_status, beatmap_id as bid, beatmapset_id as bsid, difficulty_std, difficulty_taiko, difficulty_ctb, difficulty_mania, max_combo as fc
 			from beatmaps WHERE beatmap_md5 = %s""", [scoredata["beatmap_md5"]])
+			if not data and not beatmapdata: return "[ERROR!] | I Think map was updated. Not Found DB"
 			data.update(scoredata)
 			data.update(beatmapdata)
 			
@@ -867,6 +868,7 @@ def tillerinoLast(fro, chan, message, bpp_command = False):
 			data = glob.db.fetch("SELECT song_name as sn from beatmaps WHERE beatmap_md5 = %s", [scoredata["beatmap_md5"]])
 			beatmapdata = glob.db.fetch("""SELECT ranked as beatmap_ranked_status, beatmap_id as bid, beatmapset_id as bsid, difficulty_std, difficulty_taiko, difficulty_ctb, difficulty_mania, max_combo as fc
 			from beatmaps WHERE beatmap_md5 = %s""", [scoredata["beatmap_md5"]])
+			if not data and not beatmapdata: return "[ERROR!] | I Think map was updated. Not Found DB"
 			data.update(scoredata)
 			data.update(beatmapdata)
 			
@@ -895,6 +897,7 @@ def tillerinoLast(fro, chan, message, bpp_command = False):
 			data = glob.db.fetch("SELECT song_name as sn from beatmaps WHERE beatmap_md5 = %s", [scoredata["beatmap_md5"]])
 			beatmapdata = glob.db.fetch("""SELECT ranked as beatmap_ranked_status, beatmap_id as bid, beatmapset_id as bsid, difficulty_std, difficulty_taiko, difficulty_ctb, difficulty_mania, max_combo as fc
 			from beatmaps WHERE beatmap_md5 = %s""", [scoredata["beatmap_md5"]])
+			if not data and not beatmapdata: return "[ERROR!] | I Think map was updated. Not Found DB"
 			data.update(scoredata)
 			data.update(beatmapdata)
 
