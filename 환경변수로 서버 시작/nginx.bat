@@ -2,6 +2,6 @@
 
 title nginx
 B:
-cd B:\redstar\nginx-1.23.3
+cd B:\redstar\nginx
 nginx.exe
 pause

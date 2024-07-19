@@ -1,6 +1,6 @@
 lets-debian/
 pep.py-debian/
-nginx-1.23.3/temp/
-nginx-1.23.3/logs/
+nginx/temp/
+nginx/logs/
 ap/config.ini
 ap/__pycache__
