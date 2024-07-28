@@ -15,6 +15,7 @@
 13. Frontend
 14. mediaserver
 ??. lazer?
+??. plca?
 
 15. filebrowser
 16. Realistik API
@@ -27,3 +28,5 @@
 1. twitch - 스트리머들 채팅 연결 전부 켜기, 마크 서버 2개 켜기, discord.collabo.lol, 루티봇, 루티봇 음악봇
 2. Lemres - kr.catboy.best 서버 2개 켜기 (내가 안켬)
 3. seongpo - 급식서버, 급식서버 디코봇 켜기
+4. hatoruarma - 팀스, 아르마 서버 켜기
+5. preset1 - FROG꺼
