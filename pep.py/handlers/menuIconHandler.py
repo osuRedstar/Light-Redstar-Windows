@@ -5,6 +5,7 @@ import json
 from common.web import requestsManager
 from common.log import logUtils as log
 from objects import banchoConfig as bc
+from objects import glob
 
 class handler(requestsManager.asyncRequestHandler):
 	#2024년에 https://assets.ppy.sh/menu-content.json 로 바뀜
@@ -12,6 +13,8 @@ class handler(requestsManager.asyncRequestHandler):
 	@tornado.web.asynchronous
 	@tornado.gen.engine
 	def asyncGet(self):
+		glob.self = self
+
 		try:
 			if self.request.host.startswith("assets"):
 				imageURL = bc.banchoConfig.config["menuIcon"]

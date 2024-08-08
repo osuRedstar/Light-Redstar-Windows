@@ -58,12 +58,13 @@ from helpers import packetHelper
 from objects import glob
 from common.sentry import sentry
 
-
 class handler(requestsManager.asyncRequestHandler):
 	@tornado.web.asynchronous
 	@tornado.gen.engine
 	@sentry.captureTornado
 	def asyncPost(self):
+		glob.self = self
+
 		# Track time if needed
 		if glob.outputRequestTime:
 			# Start time
@@ -243,7 +244,33 @@ class handler(requestsManager.asyncRequestHandler):
 	@tornado.web.asynchronous
 	@tornado.gen.engine
 	def asyncGet(self):
+		glob.self = self
+
 		html = 	"<html><head><title>Aoba's a cutie?</title>"
-		html += "<iframe src='https://ghostbin.co/paste/bwe8z' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
+		#html += "<iframe src='https://ghostbin.co/paste/bwe8z' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
 		#Yes. I just wrote the credit... in it.
+
+		html += '''
+		<pre>
+                    ______                   __
+  ____  _______  __/ / __ )____ _____  _____/ /_  ____
+ / __ \/ ___/ / / / / __  / __ `/ __ \/ ___/ __ \/ __ \\
+/ /_/ (__  ) /_/ /_/ /_/ / /_/ / / / / /__/ / / / /_/ /
+\____/____/\__,_(_)_____/\__,_/_/ /_/\___/_/ /_/\____/
+osu!bancho
+
+                 .  o ..
+                 o . o o.o
+                      ...oo
+                        __[]__
+                     __|_o_o_o\__
+                     \\""""""""""/
+                      \. ..  . /
+                 ^^^^^^^^^^^^^^^^^^^^
+
+web:    <a target="_blank", href="https://redstar.moe">https://redstar.moe</a>
+status: <a target="_blank", href="http://status.redstar.moe">http://status.redstar.moe</a>
+github: <a target="_blank", href="http://github.com/osuRedstar">http://github.com/osuRedstar</a>
+</pre>
+		'''
 		self.write(html)
