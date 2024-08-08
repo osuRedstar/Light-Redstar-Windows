@@ -23,12 +23,17 @@ from common.web import cheesegull
 from datetime import datetime
 import pytz
 from helpers import configHelper
-from helpers import chatHelper
 
 conf = configHelper.config("config.ini")
-
 bancho_api_key = conf.config["osu"]["apikey"]
 server_domain = conf.config["server"]["server-domain"]
+letsapiurl = conf.config["server"]["letsapiurl"].rstrip("/")
+
+def userDomainCheck():
+	try:
+		userDomain = glob.self.request.host.replace("c.", "")
+		return server_domain if userDomain == server_domain else userDomain
+	except Exception as e: print(e); return None
 
 # Redstar, catboy, 네리냥, catboy, 치무, 블켓, 사요봇, 비트,
 def redstarMessage(beatmapID):
@@ -536,8 +541,7 @@ def getPPMessage(userID, just_data = False):
 				}
 		else:
 			# Send request to LETS api
-			url = "{}/v1/pp?b={}&m={}".format(glob.conf.config["server"]["letsapiurl"].rstrip("/"), currentMap, currentMods)
-			resp = requests.get(url, timeout=10)
+			resp = requests.get(f"{letsapiurl}/v1/pp?b={currentMap}&m={currentMods}", timeout=10)
 			try:
 				assert resp is not None
 				data = json.loads(resp.text)
@@ -561,7 +565,7 @@ def getPPMessage(userID, just_data = False):
 		# Return response in chat
 		# Song name and mods
 		#msg = "{song}{plus}{mods}  ".format(song=data["song_name"], plus="+" if currentMods > 0 else "", mods=scoreUtils.readableMods(currentMods))
-		msg = "[https://osu.ppy.sh/b/{bid} Bancho] | [https://osu.{server_domain}/b/{bid} {song}] {plus}{mods}  ".format(server_domain=server_domain, bid=currentMap, song=data["song_name"], plus="+" if currentMods > 0 else "", mods=scoreUtils.readableMods(currentMods))
+		msg = "[https://osu.ppy.sh/b/{bid} Bancho] | [https://osu.{domain}/b/{bid} {song}] {plus}{mods}  ".format(domain=userDomainCheck(), bid=currentMap, song=data["song_name"], plus="+" if currentMods > 0 else "", mods=scoreUtils.readableMods(currentMods))
 
 		# PP values
 		""" if currentAcc == -1:
@@ -921,7 +925,7 @@ def tillerinoLast(fro, chan, message, bpp_command = False):
 
 		ifFc = " | {}x (FC)".format(data["fc"]) if data["max_combo"] == data["fc"] else " | {0}x/{1}x".format(data["max_combo"], data["fc"])
 		#beatmapLink = "[http://redstar.moe/b/{1} {0}]".format(data["sn"], data["bid"])
-		beatmapLink = "[https://osu.{}/b/{} {}]".format(server_domain, data["bid"], data["sn"])
+		beatmapLink = "[https://osu.{}/b/{} {}]".format(userDomainCheck(), data["bid"], data["sn"])
 		hasPP = data["play_mode"] != gameModes.CTB
 
 		#위에서 할당됨
@@ -1039,14 +1043,13 @@ def tillerinoLast(fro, chan, message, bpp_command = False):
 
 		# Send request to LETS api
 		#에러 무한반복 (아니 꺼도 또 무한반복? osuapiHelper.py 에서 커스텀 비트맵 pp조회 키면 또 에러남 ㅅㅂ)
-		url = "https://old.{}/letsapi/v1/pp?b={}&m={}".format(server_domain, data["bid"], data["mods"])
-		resp = requests.get(url, timeout=8)
+		resp = requests.get(f"{letsapiurl}/v1/pp?b={data['bid']}&m={data['mods']}", timeout=8)
 		try:
 			assert resp is not None
 			odata = json.loads(resp.text)
 		except (json.JSONDecodeError, AssertionError):
 			raise exceptions.apiException()
-		
+
 		try:
 			msg2 = "[{url} 100%: {pp100}pp | 99% {pp99}pp | 98%: {pp98}pp | 95%: {pp95}pp]".format(url=url, pp100=round(odata["pp"][0], 2), pp99=round(odata["pp"][1], 2), pp98=round(odata["pp"][2], 2), pp95=round(odata["pp"][3], 2))
 			fokamessage(chan, msg2)
@@ -1062,14 +1065,13 @@ def tillerinoLast(fro, chan, message, bpp_command = False):
 
 
 def getBeatmapRequest(fro, chan, message): # Grab a random beatmap request. TODO: Add gamemode handling to this and !request
-	
 	request = glob.db.fetch("SELECT * FROM rank_requests LIMIT 1;")
 	if request is not None:
 		username = userUtils.getUsername(request['userid'])
 		mapData = glob.db.fetch("SELECT song_name, ranked FROM beatmaps WHERE beatmap_id = {} ORDER BY difficulty_std DESC LIMIT 1;".format(request['bid']))
 		glob.db.execute("DELETE FROM rank_requests WHERE id = {};".format(request['id']))
 		#return "[https://debian.moe/u/{userID} {username}] nominated beatmap: [https://osu.ppy.sh/b/{beatmapID} {songName}] for status change. {AinuBeatmapLink}The request has been deleted, so please decide it's status.".format(userID=request['userid'], username=username, beatmapID=request['bid'], songName=mapData['song_name'], AinuBeatmapLink='[https://debian.moe/b/{} Ainu beatmap Link]. '.format(request['bid']))
-		return "[https://{server_domain}/u/{userID} {username}] nominated beatmap: [https://osu.{server_domain}/b/{beatmapID} {songName}] for status change. {AinuBeatmapLink}The request has been deleted, so please decide it's status.".format(server_domain=server_domain, userID=request['userid'], username=username, beatmapID=request['bid'], songName=mapData['song_name'], AinuBeatmapLink='[https://{}/b/{} Ainu beatmap Link]. '.format(server_domain, request['bid']))
+		return "[https://{domain}/u/{userID} {username}] nominated beatmap: [https://osu.{domain}/b/{beatmapID} {songName}] for status change. {AinuBeatmapLink}The request has been deleted, so please decide it's status.".format(domain=server_domain, userID=request['userid'], username=username, beatmapID=request['bid'], songName=mapData['song_name'], AinuBeatmapLink='[https://{}/b/{} Ainu beatmap Link]. '.format(userDomainCheck(), request['bid']))
 	else:
 		return "All nominations have been checked. Thank you for your hard work! :)"
 	
@@ -1861,9 +1863,9 @@ def editMap(fro, chan, message): # Using Atoka's editMap with Aoba's edit
 		# Announce / Log to admin panel logs when ranked status is changed
 		log.rap(userID, "has {} beatmap ({}): {} ({})".format(status, mapType, beatmapData["song_name"], mapID), True)
 		if mapType.lower() == 'set':
-			msg = "{}[https://{}/u/{} {}] has {} beatmap set: [https://osu.{}/s/{} {}]".format(ForceMessage, server_domain, userID, fro, status, server_domain, beatmapData["beatmapset_id"], BmapName)
+			msg = f"{ForceMessage}[https://{server_domain}/u/{userID} {fro}] has {status} beatmap set: [https://osu.{userDomainCheck()}/s/{beatmapData['beatmapset_id']} {BmapName}]"
 		else:
-			msg = "{}[https://{}/u/{} {}] has {} beatmap: [https://osu.{}/b/{} {}]".format(ForceMessage, server_domain, userID, fro, status, server_domain, mapID, beatmapData["song_name"])
+			msg = f"{ForceMessage}[https://{server_domain}/u/{userID} {fro}] has {status} beatmap: [https://osu.{userDomainCheck()}/b/{mapID} {beatmapData['song_name']}]"
 
 		chat.sendMessage(glob.BOT_NAME, "#ranked", msg)
 		
@@ -2392,45 +2394,6 @@ def mods_list(message):
 	log.info("newMods = {}".format(newMods))
 	return newMods
 
-def pp_bid(fro, chan, message):
-	return "Use !with <mods> command!"
-	try:
-		song_info = glob.db.fetch("SELECT song_name, beatmapset_id, beatmap_id FROM beatmaps WHERE beatmap_id = %s", [message[0]])
-
-		newMods = mods_list(message)
-
-		newMods_name = " +"
-		pass_bid = True
-		for i in message:
-			if pass_bid is not True:
-				if newMods is not 0:
-					newMods_name += i.upper() + " "
-				else:
-					newMods_name = ""
-			else:
-				pass_bid = False
-		log.info("newMods_name = {}".format(newMods_name))
-
-		if len(message) < 2:
-			log.info("pp_bid 조회중 사용자가 모드를 입력하지 않음 --> 논모드 조회")
-			param = {'b': message[0]}
-			r = requests.get(f'https://old.{server_domain}/letsapi/v1/pp', params=param)
-			r = r.json()
-			request_link = f"https://old.{server_domain}/letsapi/v1/pp?b={message[0]}"
-		else:
-			log.info("pp_bid 조회중...")
-			param = {'b': message[0], 'm': newMods}
-			r = requests.get(f'https://old.{server_domain}/letsapi/v1/pp', params=param)
-			r = r.json()
-			request_link = f"https://old.{server_domain}/letsapi/v1/pp?b={message[0]}&m={newMods}"
-		
-		log.info("newMods = {}".format(newMods))
-
-		return f"[https://osu.{server_domain}/b/{message[0]} {song_info['song_name']}] {newMods_name} pp is [{request_link} 100%={round(r['pp'][0])}pp,  99%={round(r['pp'][1])}pp,  98%={round(r['pp'][2])}pp,  95%={round(r['pp'][3])}pp]"
-	except:
-		log.error(f"ERROR (!bidpp {message[0]} {message[1]}) | bid = {message[0]}, mod = {message[1]}, reqeust_link = {request_link}")
-		return f"ERROR (!bidpp {message[0]} {message[1]}) | bid = {message[0]}, mod = {message[1]}, reqeust_link = {request_link}"
-	
 def ingame_rank_request(fro, chan, message):
 	# Get token and user ID
 	token = glob.tokens.getTokenFromUsername(fro)
@@ -2469,7 +2432,7 @@ def ingame_rank_request(fro, chan, message):
 		#데이터 처리량 많을때 리턴 인게임에서 rebuse 뜸
 		fokamessage(chan, r)
 
-		return f"[https://{server_domain}/u/{userID} {fro}] | [https://osu.{server_domain}/s/{isranked['beatmapset_id']} {isranked['song_name']}] Changed Qualified!"
+		return f"[https://{server_domain}/u/{userID} {fro}] | [https://osu.{userDomainCheck()}/s/{isranked['beatmapset_id']} {isranked['song_name']}] Changed Qualified!"
 	else:
 		if isranked["ranked"] is 0:
 			ranked_status_txt = "unranked"
@@ -2487,14 +2450,14 @@ def ingame_rank_request(fro, chan, message):
 		if rqcheck is None and isranked["ranked"] is 4:
 			log.info("pep | 리퀘 재요청 중 ({}된 맵)".format(ranked_status_txt))
 			glob.db.execute(f"INSERT INTO rank_requests (id, userid, bid, type, time, blacklisted) VALUES ('NULL', {userID}, {bid}, 'b', {time.time()}, 0)")
-			fokamessage(chan, f"[https://osu.{server_domain}/b/{bid} {bid}] 비트맵은 {ranked_status_txt}상태이고 리퀘만 누락되어 리퀘 재요청함")
+			fokamessage(chan, f"[https://osu.{userDomainCheck()}/b/{bid} {bid}] 비트맵은 {ranked_status_txt}상태이고 리퀘만 누락되어 리퀘 재요청함")
 		
 		log.warning("{} 해당 비트맵 상태 = {}".format(bid, ranked_status_txt))
 		
 		rankedby_msg = f"[https://{server_domain}/u/{isranked['rankedby']} {userUtils.getUsername(isranked['rankedby'])}]"  if isranked["rankedby"] != "Bancho" else "Bancho"
 		
 
-		return f"refuse [https://{server_domain}/u/{userID} {fro}] | [https://osu.{server_domain}/b/{bid} {isranked['song_name']}] is {ranked_status_txt} by {rankedby_msg}"
+		return f"refuse [https://{server_domain}/u/{userID} {fro}] | [https://osu.{userDomainCheck()}/b/{bid} {isranked['song_name']}] is {ranked_status_txt} by {rankedby_msg}"
 
 def song_info(fro, chan, message):
 	# Get token and user ID
@@ -2532,9 +2495,7 @@ def song_info(fro, chan, message):
 		newMods = tillerinoMods(fro, chan, message if message != [] else ["no"], modsNumType="!songinfo")
 
 		log.info("pp_songinfo 조회중...")
-		param = {'b': bid, 'm': newMods}
-		response = requests.get(f'https://old.{server_domain}/letsapi/v1/pp', params=param)
-		r = response.json()
+		r = requests.get(f"{letsapiurl}/v1/pp?b={bid}&m={newMods}").json()
 
 		try:
 			pp_msg = f"100%={round(r['pp'][0])}pp,  99%={round(r['pp'][1])}pp,  98%={round(r['pp'][2])}pp,  95%={round(r['pp'][3])}pp"
@@ -2561,10 +2522,7 @@ def song_info(fro, chan, message):
 		#Bancho api 조회
 		try:
 			log.info("Bancho date 조회중...")
-			param = {'k': bancho_api_key, 'b': bid}
-			response = requests.get('https://osu.ppy.sh/api/get_beatmaps', params=param)
-			bancho_info = response.json()
-			bancho_info = bancho_info[0]
+			bancho_info = requests.get(f'https://osu.ppy.sh/api/get_beatmaps?k={bancho_api_key}&b={bid}').json()[0]
 		except:
 			log.error("!songinfo | Bancho date 오류 (Bancho 불러오기 실패)")
 			bancho_info = {'submit_date':0, 'last_update':0, 'approved_date':0}#, 'total_length':0}
@@ -2573,10 +2531,7 @@ def song_info(fro, chan, message):
 		#Redstar api 조회
 		try:
 			log.info("Redstar date 조회중...")
-			param = {'b': bid}
-			response = requests.get(f'https://{server_domain}/api/v1/get_beatmaps', params=param)
-			redstar_info = response.json()
-			redstar_info = redstar_info[0]
+			redstar_info = requests.get(f'https://{server_domain}/api/v1/get_beatmaps?b={bid}').json()[0]
 			if songinfo['rankedby'] != "Bancho":
 				redstar_last_update_date = f", (last_update = {redstar_info['last_update']})"
 			else:
@@ -2654,9 +2609,9 @@ def song_info(fro, chan, message):
 			creator = f"Not Found"
 		
 		msg = f"[https://{server_domain}/u/{userID} {fro}] | "
-		msg += f"[https://osu.{server_domain}/b/{bid} {songinfo['song_name']}] is {ranked_status_txt} {rankedby_msg}{redstar_last_update_date} | "
+		msg += f"[https://osu.{userDomainCheck()}/b/{bid} {songinfo['song_name']}] is {ranked_status_txt} {rankedby_msg}{redstar_last_update_date} | "
 		msg += f"{newMods_name} is [{request_link} {pp_msg}] | "
-		msg += f"Beatmap_md5 = [https://old.{server_domain}/letsapi/v1/find-beatmap-md5?md5={songinfo['beatmap_md5']} {songinfo['beatmap_md5']}], BeatmapID = [https://{server_domain}/b/{songinfo['beatmap_id']} {songinfo['beatmap_id']}], BeatmapSetID = [https://osu.ppy.sh/s/{songinfo['beatmapset_id']} {songinfo['beatmapset_id']}] | "
+		msg += f"Beatmap_md5 = [https://old.{server_domain}/letsapi/v1/find-beatmap-md5?md5={songinfo['beatmap_md5']} {songinfo['beatmap_md5']}], BeatmapID = [https://{userDomainCheck()}/b/{songinfo['beatmap_id']} {songinfo['beatmap_id']}], BeatmapSetID = [https://osu.ppy.sh/s/{songinfo['beatmapset_id']} {songinfo['beatmapset_id']}] | "
 		msg += f"length = {length}, maxCombo = {songinfo['max_combo']}, bpm = {songinfo['bpm']}, AR = {songinfo['ar']}, OD = {songinfo['od']} | "
 		msg += f"difficulty_std = {songinfo['difficulty_std']}, difficulty_taiko = {songinfo['difficulty_taiko']}, difficulty_ctb = {songinfo['difficulty_ctb']}, difficulty_mania = {songinfo['difficulty_mania']} | "
 		msg += f"Creator = {creator}, submit_date = {bancho_info['submit_date']}, last_update = {bancho_info['last_update']}, approved_date = {bancho_info['approved_date']}, ({bancho_ranked_status} In Bancho) | "
@@ -2666,16 +2621,14 @@ def song_info(fro, chan, message):
 	except:
 		log.error("ERROR | song_info() 함수 예외처리됨")
 		msg = f"ERROR | [https://{server_domain}/u/{userID} {fro}] | "
-		msg += f"[https://osu.{server_domain}/b/{bid} {bid}] beatmap does not exist in Redstar DB. Most likely a map that has been removed from Bancho."
+		msg += f"[https://osu.{userDomainCheck()}/b/{bid} {bid}] beatmap does not exist in Redstar DB. Most likely a map that has been removed from Bancho."
 		return msg
 	
 def md5tobid(fro, chan, message):
 	userID = userUtils.getID(fro)
 	try:
-		param = {'md5': message[0]}
-		r = requests.get(f'https://old.{server_domain}/letsapi/v1/find-beatmap-md5', params=param)
-		r = r.json()
-		msg = f"[https://{server_domain}/u/{userID} {fro}] | [https://old.{server_domain}/letsapi/v1/find-beatmap-md5?md5={message[0]} Link]  [https://osu.{server_domain}/b/{r['beatmap_id']} {r['beatmap_id']}]"
+		r = requests.get(f"{letsapiurl}/v1/find-beatmap-md5?md5={message[0]}").json()
+		msg = f"[https://{server_domain}/u/{userID} {fro}] | [https://old.{server_domain}/letsapi/v1/find-beatmap-md5?md5={message[0]} Link]  [https://osu.{userDomainCheck()}/b/{r['beatmap_id']} {r['beatmap_id']}]"
 		return msg
 	except:
 		log.error("ERROR | md5tobid() 함수 예외처리됨")
@@ -2830,7 +2783,7 @@ def replayID_convert(fro, chan, message):
 	rank = generalUtils.getRank(score_info["play_mode"], score_info["mods"], score_info["accuracy"],
 									score_info["300_count"], score_info["100_count"], score_info["50_count"], score_info["misses_count"])
 	
-	msg = f"[{type[0]}] [https://{server_domain}/u/{type[2]}{userID} {uname['username']}] | [https://osu.{server_domain}/b/{beatmap_info['beatmap_id']} {beatmap_info['song_name']}]"
+	msg = f"[{type[0]}] [https://{server_domain}/u/{type[2]}{userID} {uname['username']}] | [https://osu.{userDomainCheck()}/b/{beatmap_info['beatmap_id']} {beatmap_info['song_name']}]"
 	msg += f" + {mods}" if mods != "" else ""
 	msg += f" ({round(score_info['accuracy'], 2)}%, {rank})"
 	#ranked_status추가
@@ -2861,7 +2814,7 @@ def replayID_convert(fro, chan, message):
 	else:
 		msg += " | UNKNOWN gamemode"
 	msg += f" | {round(score_info['pp'], 2)}pp | completed = {score_info['completed']} | {unix_to_date(score_info['time'])}"
-	msg += f" | BeatmapID = [https://{server_domain}/b/{beatmap_info['beatmap_id']} {beatmap_info['beatmap_id']}], BeatmapSetID = [https://osu.ppy.sh/s/{beatmap_info['beatmapset_id']} {beatmap_info['beatmapset_id']}]"
+	msg += f" | BeatmapID = [https://{userDomainCheck()}/b/{beatmap_info['beatmap_id']} {beatmap_info['beatmap_id']}], BeatmapSetID = [https://osu.ppy.sh/s/{beatmap_info['beatmapset_id']} {beatmap_info['beatmapset_id']}]"
 	msg += f" | [https://{server_domain}/web/replays{type[1]}/{replayID} Replay download] | [osu://b/{beatmap_info['beatmap_id']} osu!direct]"
 
 	return msg
@@ -2911,7 +2864,7 @@ def history_beatmap(fro, chan, message):
 		msg += f"[https://{server_domain}/u/{type[2]}{userID} {fro}] | "
 
 		#beatmapLink
-		msg  += "[https://osu.{}/b/{} {}]".format(server_domain, bid, beatmap_info["song_name"])
+		msg  += "[https://osu.{}/b/{} {}]".format(userDomainCheck(), bid, beatmap_info["song_name"])
 
 		if data["play_mode"] != gameModes.STD:
 			msg += " <{0}>".format(gameModes.getGameModeForPrinting(data["play_mode"]))
@@ -3011,7 +2964,7 @@ def history_beatmap(fro, chan, message):
 	# Send request to LETS api
 	#에러 무한반복 (아니 꺼도 또 무한반복? osuapiHelper.py 에서 커스텀 비트맵 pp조회 키면 또 에러남 ㅅㅂ)
 	try:
-		url = "https://old.{}/letsapi/v1/pp?b={}&m={}".format(server_domain, bid, data["mods"])
+		url = f"https://old.{server_domain}/letsapi/v1/pp?b={bid}&m={data['mods']}"
 		msg2 = "[{url} 100%: {pp100}pp | 99% {pp99}pp | 98%: {pp98}pp | 95%: {pp95}pp]".format(url=url, pp100=round(oppaiData["pp"][0], 2), pp99=round(oppaiData["pp"][1], 2), pp98=round(oppaiData["pp"][2], 2), pp95=round(oppaiData["pp"][3], 2))
 		fokamessage(chan, msg2)
 		return fokamessage(chan, f"count = {len(history_info)}")
@@ -3050,7 +3003,7 @@ def map_suggest(fro, chan, message):
 			values = ("NULL", mapType, setbid, data["song_name"], ppMsg, int(time.time()))
 			try:
 				glob.db.execute(query, values)
-				return f"Success INSERT | {mapType} | [https://osu.{server_domain}/b/{setbid} {data['song_name']}] | pp = {ppMsg} | [osu://b/{setbid} osu!direct]"
+				return f"Success INSERT | {mapType} | [https://osu.{userDomainCheck()}/b/{setbid} {data['song_name']}] | pp = {ppMsg} | [osu://b/{setbid} osu!direct]"
 			except:
 				log.error(f"setbid = {setbid} | DB INSERT 실패!")
 				return f"setbid = {setbid} | DB INSERT Fail!"
@@ -3058,12 +3011,12 @@ def map_suggest(fro, chan, message):
 			return "You have not set Permission!"
 	else:
 		for i in mapList:
-			fokamessage(fro, f"{mapType} | [https://osu.{server_domain}/b/{i['beatmap_id']} {i['song_name']}] | pp = {i['ppMsg']} | [osu://b/{i['beatmap_id']} osu!direct]")
+			fokamessage(fro, f"{mapType} | [https://osu.{userDomainCheck()}/b/{i['beatmap_id']} {i['song_name']}] | pp = {i['ppMsg']} | [osu://b/{i['beatmap_id']} osu!direct]")
 		return f"[https://{server_domain}/u/{userID} {fro}] Check [https://{server_domain}/u/999 Devlant]'s message!"
 
 def servers_status(fro, chan, message):
 	bancho_url = f"https://c.{server_domain}/api/v1/serverStatus"
-	lets_url = f"https://old.{server_domain}/letsapi/v1/status"
+	lets_url = f"{letsapiurl}/v1/status"
 	api_url = f"https://{server_domain}/api/v1/ping"
 	mediaserver_url = f"https://b.{server_domain}/status"
 
@@ -3186,7 +3139,7 @@ def tillerinoRecommand(fro, chan, message):
 	log.warning(rc)
 
 	#msg2 = "[{url} 100%: {pp100}pp | 99% {pp99}pp | 98%: {pp98}pp | 95%: {pp95}pp]".format(url=url, pp100=round(odata["pp"][0], 2), pp99=round(odata["pp"][1], 2), pp98=round(odata["pp"][2], 2), pp95=round(odata["pp"][3], 2))
-	return f"[https://osu.{server_domain}/b/{rc['bid']} {rc['songname']}] {f'+{mods.upper()}' if modsNum != 0 else ''} 100%: {rc['pp100']}pp | 99% {rc['pp99']}pp | 98%: {rc['pp98']}pp | 95%: {rc['pp95']}pp [osu://b/{rc['bid']} osu!direct]"
+	return f"[https://osu.{userDomainCheck()}/b/{rc['bid']} {rc['songname']}] {f'+{mods.upper()}' if modsNum != 0 else ''} 100%: {rc['pp100']}pp | 99% {rc['pp99']}pp | 98%: {rc['pp98']}pp | 95%: {rc['pp95']}pp [osu://b/{rc['bid']} osu!direct]"
 
 def B_dl(fro, chan, message):
 	try:
@@ -3222,12 +3175,12 @@ def BanchoLink_to_mirror(fro, chan, message):
 ####################################################################################################
 
 def fokamessage(chan, message):
-	return chatHelper.sendMessage(glob.BOT_NAME, chan.encode().decode("latin-1"), message.encode().decode("latin-1"))
+	return chat.sendMessage(glob.BOT_NAME, chan.encode().decode("latin-1"), message.encode().decode("latin-1"))
 
 def unix_to_date(time):
 	unix_timestamp = int(time)
 	return datetime.fromtimestamp(unix_timestamp)
-	
+
 """
 Commands list
 
@@ -3463,10 +3416,6 @@ commands = [
 		"trigger": "!acc",
 		"callback": tillerinoAcc,
 		"syntax": "<accuarcy>"
-	}, {
-		"trigger": "!bidpp",
-		#"syntax": "<Beatmap_id> <mods>",
-		"callback": pp_bid
 	}, {
 		"trigger": "!rankrq",
 		#"syntax": "<Beatmap_id>",
