@@ -1043,7 +1043,8 @@ def tillerinoLast(fro, chan, message, bpp_command = False):
 
 		# Send request to LETS api
 		#에러 무한반복 (아니 꺼도 또 무한반복? osuapiHelper.py 에서 커스텀 비트맵 pp조회 키면 또 에러남 ㅅㅂ)
-		resp = requests.get(f"{letsapiurl}/v1/pp?b={data['bid']}&m={data['mods']}", timeout=8)
+		url = f"https://old.{server_domain}/letsapi/v1/pp?b={data['bid']}&m={data['mods']}"
+		resp = requests.get(url, timeout=8)
 		try:
 			assert resp is not None
 			odata = json.loads(resp.text)
