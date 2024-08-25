@@ -170,7 +170,7 @@ class handler(requestsManager.asyncRequestHandler):
 			beatmapInfo.setDataFromDB(s.fileMd5)
 
 			def sendautobanmail():
-				log.rap(999, "has Auto banned {}".format(f"{username} ({userID})"), True, "lets.py | submitModularHandler.py")
+				log.rap(999, f"has Auto banned {username} ({userID}) | ip = {ip}", True, "lets.py | submitModularHandler.py")
 
 				AuthKey = "" 
 				for i in range(16) :
