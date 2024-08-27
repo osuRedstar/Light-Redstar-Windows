@@ -65,6 +65,8 @@ class handler(requestsManager.asyncRequestHandler):
 	def asyncPost(self):
 		glob.self = self
 
+		ip = self.getRequestIP()
+
 		# Track time if needed
 		if glob.outputRequestTime:
 			# Start time
@@ -183,9 +185,9 @@ class handler(requestsManager.asyncRequestHandler):
 							if not userToken.restricted or (userToken.restricted and packetID in packetsRestricted):
 								eventHandler[packetID]()
 							else:
-								log.warning("Ignored packet id from {} ({}) (user is restricted)".format(requestTokenString, packetID))
+								log.warning("{} | Ignored packet id from {} ({}) (user is restricted)".format(ip, requestTokenString, packetID))
 						else:
-							log.warning("Unknown packet id from {} ({})".format(requestTokenString, packetID))
+							log.warning("{} | Unknown packet id from {} ({})".format(ip, requestTokenString, packetID))
 
 					# Update pos so we can read the next stacked packet
 					# +7 because we add packet ID bytes, unused byte and data length bytes
@@ -199,8 +201,8 @@ class handler(requestsManager.asyncRequestHandler):
 				# Token not found. Disconnect that user
 				responseData = serverPackets.loginError()
 				responseData += serverPackets.notification("Oh no! Debian have something wrong at the moment... Maybe try login again?")
-				log.warning("Received packet from unknown token ({}).".format(requestTokenString))
-				log.info("{} has been disconnected (invalid token)".format(requestTokenString))
+				log.warning("{} | Received packet from unknown token ({}).".format(ip, requestTokenString))
+				log.info("{} | {} has been disconnected (invalid token)".format(ip, requestTokenString))
 			finally:
 				# Unlock token
 				if userToken is not None:
