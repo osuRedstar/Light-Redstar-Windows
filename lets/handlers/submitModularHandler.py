@@ -146,7 +146,7 @@ class handler(requestsManager.asyncRequestHandler):
 			UsingAutopilot = used_mods & 8192
 
 			# Create score object and set its data
-			log.info("{} has submitted a score on {}...".format(username, scoreData[0]))
+			log.info("{} | {} has submitted a score on {}...".format(ip, username, scoreData[0]))
 			if UsingRelax:
 				s = scoreRelax.score()
 			elif UsingAutopilot:

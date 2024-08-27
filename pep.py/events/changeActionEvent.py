@@ -124,4 +124,6 @@ if userToken.matchID != -1 and userToken.actionID != actions.MULTIPLAYING and us
 			i.enqueue(serverPackets.userStats(userID, force))
 
 	# Console output
-	log.info("{} changed action: {} [{}][{}][{}]".format(username, str(userToken.actionID), userToken.actionText, userToken.actionMd5, userToken.beatmapID))
+	from common.web import requestsManager
+	ip = requestsManager.asyncRequestHandler.getRequestIP(glob.self)
+	log.info("{} | {} changed action: {} [{}][{}][{}]".format(ip, username, str(userToken.actionID), userToken.actionText, userToken.actionMd5, userToken.beatmapID))
