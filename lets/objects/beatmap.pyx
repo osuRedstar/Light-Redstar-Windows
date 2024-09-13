@@ -110,6 +110,7 @@ class beatmap:
 			self.songName.encode("utf-8", "ignore").decode("utf-8"),
 			self.AR,
 			self.OD,
+			self.mode,
 			self.starsStd,
 			self.starsTaiko,
 			self.starsCtb,
@@ -127,7 +128,7 @@ class beatmap:
 			#self.version,
 			#self.CS,
 			#self.HP,
-			#self.mode
+			##self.mode
 		#)
 		]
 		#DB 구조 변경 전까지는 비활성화
@@ -135,10 +136,10 @@ class beatmap:
 			params.append(self.fileName) """
 		objects.glob.db.execute(
 			"INSERT INTO `beatmaps` (`id`, `beatmap_id`, `beatmapset_id`, `beatmap_md5`, `song_name`, "
-			"`ar`, `od`, `difficulty_std`, `difficulty_taiko`, `difficulty_ctb`, `difficulty_mania`, "
+			"`ar`, `od`, `mode`, `difficulty_std`, `difficulty_taiko`, `difficulty_ctb`, `difficulty_mania`, "
 			"`max_combo`, `hit_length`, `bpm`, `ranked`, "
 			"`latest_update`, `ranked_status_freezed`) "
-			"VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+			"VALUES (NULL, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
 			params
 		)
 
@@ -220,7 +221,7 @@ class beatmap:
 		#self.version = data["version"]
 		#self.CS = float(data["cs"])
 		#self.HP = float(data["hp"])
-		#self.mode = int(data["mode"])
+		self.mode = int(data["mode"])
 
 	def setDataFromOsuApi(self, md5, beatmapSetID):
 		"""
