@@ -3135,7 +3135,7 @@ def tillerinoRecommand(fro, chan, message):
 			rc["pp98"] = i["pp_98"]
 			rc["pp95"] = i["pp_95"]
 
-	log.info(f"tillereino r | mods = {mods} | modsNum = {modsNum}")
+	log.info(f"tillerino r | mods = {mods} | modsNum = {modsNum}")
 	log.info(f"totalPP = {totalPP} | avgPP = {avgPP}")
 	log.warning(rc)
 
@@ -3143,18 +3143,18 @@ def tillerinoRecommand(fro, chan, message):
 	return f"[https://osu.{userDomainCheck()}/b/{rc['bid']} {rc['songname']}] {f'+{mods.upper()}' if modsNum != 0 else ''} 100%: {rc['pp100']}pp | 99% {rc['pp99']}pp | 98%: {rc['pp98']}pp | 95%: {rc['pp95']}pp [osu://b/{rc['bid']} osu!direct]"
 
 def B_dl(fro, chan, message):
+	token = glob.tokens.getTokenFromUsername(fro)
+	if token is None: log.error("ERROR: No token")
 	try:
-		message[0] = int(message[0])
-	except:
-		return f"{message[0]} is not Number!"
-	return f"[osu://b/{message[0]} {message[0]}]"
+		bid = token.tillerino[0] = int(message[0])
+		try: token.tillerino[3] = f"by !b {bid}"
+		except: token.tillerino.append(f"by !b {bid}")
+		return f"[osu://b/{bid} {bid}]"
+	except: return f"{message[0]} is not Number!"
 
 def D_dl(fro, chan, message):
-	try:
-		message[0] = int(message[0])
-	except:
-		return f"{message[0]} is not Number!"
-	return f"[osu://s/{message[0]} {message[0]}]"
+	try: bsid = int(message[0]); return f"[osu://s/{bsid} {bsid}]"
+	except: return f"{message[0]} is not Number!"
 
 def BanchoLink_to_mirror(fro, chan, message):
 	mode = fokabot.npRegex_BanchoWebLink(message)[0]
@@ -3173,14 +3173,70 @@ def BanchoLink_to_mirror(fro, chan, message):
 
 	return f"{mode} | {mirrorMessage(beatmapID)}"
 
+def multiLeaderboard(fro, chan, message):
+	token = glob.tokens.getTokenFromUsername(fro)
+	if token is None:
+		log.error("ERROR: No token")
+		return "ERROR: No token"
+	bid = int(token.tillerino[0])
+
+	# Make sure the user has triggered the bot with /np command
+	if bid == 0:
+		return "Please give me a beatmap first with /np command."
+
+	beatmap_md5 = glob.db.fetch(f"SELECT beatmap_md5, song_name, mode, ranked FROM beatmaps WHERE beatmap_id = {bid}")
+	beatmap_md5, songname, gamemode, ranked = (beatmap_md5["beatmap_md5"], beatmap_md5["song_name"], beatmap_md5["mode"], beatmap_md5["ranked"])
+
+	if not gamemode: #std
+		if message[0].lower() == "std" or message[0].lower() == "s": mod = 0; modType = "[STD]"
+		elif message[0].lower() == "taiko" or message[0].lower() == "t": mod = 1; modType = "[Taiko]"
+		elif message[0].lower() == "ctb" or message[0].lower() == "c": mod = 2; modType = "[CTB]"
+		elif message[0].lower() == "mania" or message[0].lower() == "m": mod = 3; modType = "[Mania]"
+		else: mod = 0; modType = "[STD]"
+	else: #NOT std
+		if gamemode == 0: mod = 0; modType = "[STD]"
+		elif gamemode == 1: mod = 1; modType = "[Taiko]"
+		elif gamemode == 2: mod = 2; modType = "[CTB]"
+		elif gamemode == 3: mod = 3; modType = "[Mania]"
+		else: mod = 0; modType = "[STD]"
+
+	if message[1].lower() == "vn":
+		relax = ""; sort = "score"; modeType = "[Vanilla]"
+	elif message[1].lower() == "rx":
+		if mod == 3: return "Doesn't Exist RX Mania"
+		relax = "_relax"; sort = "pp"; modeType = "[Relax]"
+	elif message[1].lower() == "ap":
+		if mod != 0: return "Doesn't Exist AP Taiko, AP CTB, AP Mania"
+		relax = "_ap"; sort = "pp"; modeType = "[AP]"
+	else:
+		relax = ""; sort = "score"; modeType = "[Vanilla]"
+	if relax and (ranked == 5 or ranked == 4): sort = "score"
+
+	if ranked == 2: rankedRead = "Ranked"
+	elif ranked == 5: rankedRead = "Loved"
+	elif ranked == 3: rankedRead = "Approved (Ranked)"
+	elif ranked == 4: rankedRead = "Qualified (Not Ranked Yet)"
+	elif ranked == 0: rankedRead = "Unranked"
+	else: rankedRead = "Ranked status Unknown"
+
+	leaderboard = glob.db.fetchAll(f"SELECT u.username, s.* FROM scores{relax} as s JOIN users AS u ON s.userid = u.id WHERE s.beatmap_md5 = %s AND s.play_mode = %s AND s.completed = 3 AND u.privileges & 1 > 0 ORDER BY {sort} DESC LIMIT 10000", [beatmap_md5, mod])
+	if not leaderboard: return f"{modType} {modeType} [osu://b/{bid} {songname}] has NO DATA"
+
+	for i, d in enumerate(leaderboard):
+		clan = glob.db.fetch("SELECT tag FROM clans AS c JOIN user_clans AS uc ON c.id = uc.clan WHERE uc.user = %s", [d["userid"]])
+		username = f"[{clan['tag']}] {d['username']}" if False and clan else d["username"]
+		mods = scoreUtils.readableMods(d['mods'])
+		if mods: mods = ' +' + mods
+		rank = generalUtils.getRank(d["play_mode"], d["mods"], d["accuracy"], d["300_count"], d["100_count"], d["50_count"], d["misses_count"])
+		msg = f"{modType} {modeType} #{i+1} [https://{server_domain}/u/{d['userid']} {username}] | [osu://b/{bid} {songname}]{mods} ({round(d['accuracy'], 2)}%, {rank}) | {rankedRead} | {d['score']:,} | {round(d['pp'], 2)}pp | {unix_to_date(d['time'])}"
+		fokamessage(chan, msg)
+
 ####################################################################################################
 
 def fokamessage(chan, message):
 	return chat.sendMessage(glob.BOT_NAME, chan.encode().decode("latin-1"), message.encode().decode("latin-1"))
 
-def unix_to_date(time):
-	unix_timestamp = int(time)
-	return datetime.fromtimestamp(unix_timestamp)
+def unix_to_date(time): return datetime.fromtimestamp(int(time))
 
 """
 Commands list
@@ -3492,6 +3548,10 @@ commands = [
 		"trigger": "!d",
 		"syntax": "<BeatmapSetID>",
 		"callback": D_dl
+	}, {
+		"trigger": "!lb",
+		"syntax": "<std(s)/taiko(t)/ctb(c)/mania(m)> <vn/rx/ap>",
+		"callback": multiLeaderboard
 	}, {
 		"trigger": "https://osu.ppy.sh/beatmapsets/",
 		"callback": BanchoLink_to_mirror,
