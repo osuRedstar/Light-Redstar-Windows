@@ -34,6 +34,9 @@ To są komendy które obsługuje Fokabot, nasz chat bot.
 - `!history <vn/rx/ap> <BeatmapID>` - Zwraca wszystkie odtworzenia utworu przy użyciu identyfikatora beatmapID.
 - `!mapsuggest <jump/stream/+set(1000,999)>` - zalecane mapy stream lub jump. [przez 1000](https://redstar.moe/u/1000)
 - `!status` - Sprawdź status serwera. [Bancho](https://c.redstar.moe/api/v1/serverStatus), [lets](https://old.redstar.moe/letsapi/v1/status), [api](https://redstar.moe/api/v1/ping), [mediaserver](https://b.redstar.moe/status)
+- `!b <BeatmapID>` - Zwraca link osu!direct (b/)
+- `!d <BeatmapSetID>` - Zwraca link osu!direct (d/)
+- `!lb <std(s)/taiko(t)/ctb(c)/mania(m)> <vn/rx/ap>` - Zwraca ranking
 
 ### Komendy `!mp` (Turniej)
 - `!mp <subcommand>` - główny
@@ -74,6 +77,8 @@ Fokabot ma trochę komend podobnych do Tillerino. Te komendy działają tylko je
 
 
 - `!with <mods>` - Pokaż PP za ostatnio wysłaną mape z określonymi modami. Wspierane są `NF, EZ, HD, HR, DT, HT, NC, FL, SO.`. Nie używaj spacji dla wielu modów (np: `!with HDHR`)
+
+- `!r` - Poleca Losową Beatmapę (Oblicza średni PP, stosując wagi do 10 najlepszych rekordów PP i dzieląc sumę ważoną przez 10. W przypadku braku trybu, używa maksymalnego osiągalnego PP jako podstawy i poleca mapy w stanie ranked lub approved w zakresie ±50PP od średniego PP.)
 
 - `!token.tillerino` - Sprawdź informacje token.tillerino `[Beatmap_ID, mod (liczba), acc, by]`.
 - `!del token.tillerino` - Usuń wartość token.tillerino (reset) `[0, 0, -1.0, by !del token.tillerino]`

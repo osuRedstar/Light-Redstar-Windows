@@ -34,6 +34,9 @@ These are the commands supported by FokaBot, our chat bot.
 - `!history <vn/rx/ap> <BeatmapID>` - Returns the all your plays record of the song using the beatmapID.
 - `!mapsuggest <jump/stream/+set(1000,999)>` - recommend stream or jump maps. [by 1000](https://redstar.moe/u/1000)
 - `!status` - Check server status. [Bancho](https://c.redstar.moe/api/v1/serverStatus), [lets](https://old.redstar.moe/letsapi/v1/status), [api](https://redstar.moe/api/v1/ping), [mediaserver](https://b.redstar.moe/status)
+- `!b <BeatmapID>` - Return osu!direct Link (b/)
+- `!d <BeatmapSetID>` - Return osu!direct Link (d/)
+- `!lb <std(s)/taiko(t)/ctb(c)/mania(m)> <vn/rx/ap>` - Return leaderboard
 
 ### `!mp` (Tournament) commands
 - `!mp <subcommand>` - main
@@ -73,6 +76,8 @@ Fokabot has some commands similar to Tillerino. Those commands work only if you 
 - `!last ap <username_safe>` - Show info (and gained PP, if it was an osu! standard score) about the last submitted score by username (Autopilot)
 
 - `!with <mods>` - Show PP for the previous requested beatmap with requested mods. Supported mods are `NF, EZ, HD, HR, DT, HT, NC, FL, SO.`. Don't use spaces for multiple mods (eg: `!with HDHR`)
+
+- `!r` - Recommand Random Beatmap (Calculate the average PP by applying weights to the top 10 PP records and dividing the weighted sum by 10. In the case where there is NO mode, use the maximum achievable PP as the basis and recommend maps in the ranked or approved state within a ±50PP range of the average PP.)
 
 - `!token.tillerino` - Check information of token.tillerino `[Beatmap_ID, mod (number), acc, by]`
 - `!del token.tillerino` - Delete token.tillerino value (reset) `[0, 0, -1.0, by !del token.tillerino]`

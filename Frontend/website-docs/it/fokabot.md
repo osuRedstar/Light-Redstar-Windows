@@ -34,6 +34,9 @@ Questi sono i comandi supportati da FokaBot, il nostro chat bot.
 - `!history <vn/rx/ap> <BeatmapID>` - Restituisce il record di tutte le riproduzioni del brano utilizzando il beatmapID.
 - `!mapsuggest <jump/stream/+set(1000,999)>` - raccomandare mappe di stream o di jump. [di 1000](https://redstar.moe/u/1000)
 - `!status` - Controllare lo stato del server. [Bancho](https://c.redstar.moe/api/v1/serverStatus), [lets](https://old.redstar.moe/letsapi/v1/status), [api](https://redstar.moe/api/v1/ping), [mediaserver](https://b.redstar.moe/status)
+- `!b <BeatmapID>` - Restituisce il link di osu!direct (b/)
+- `!d <BeatmapSetID>` - Restituisce il link di osu!direct (d/)
+- `!lb <std(s)/taiko(t)/ctb(c)/mania(m)> <vn/rx/ap>` - Restituisce la classifica
 
 ### Comandi `!mp` (Torneo)
 - `!mp <subcommand>` - principale
@@ -73,6 +76,8 @@ Fokabot dispone di comandi simili a Tillerino. Questi comandi funzionano solo se
 - `!last ap <username_safe>` - Mostra delle informazioni (e i PP ottenuti, se fosse un punteggio di osu! standard) riguardanti l'ultimo punteggio inviato da username (Autopilot)
 
 - `!with <mods>` - Mostra i PP per la beatmap precedentemente richiesta con i modificatori richiesti. I modificatori supportati sono `NF, EZ, HD, HR, DT, HT, NC, FL, SO.`. Non usare gli spazi per più modificatori (ad esempio: `!with HDHR`)
+
+- `!r` - Raccomanda una Beatmap Casuale (Calcola il PP medio applicando pesi ai primi 10 record di PP e dividendo la somma ponderata per 10. In assenza di modalità, usa il PP massimo raggiungibile come base e raccomanda mappe nello stato classificato o approvato all'interno di un intervallo ±50PP dal PP medio.)
 
 - `!token.tillerino` - Controllare le informazioni di token.tillerino `[Beatmap_ID, mod (numero), acc, by]`
 - `!del token.tillerino` - Cancellare il valore di token.tillerino (reset) `[0, 0, -1.0, by !del token.tillerino]`

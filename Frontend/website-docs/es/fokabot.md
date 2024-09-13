@@ -34,6 +34,9 @@ Estos son los comandos soportados por FokaBot, nuestro bot de chat.
 - `!history <vn/rx/ap> <BeatmapID>` - Devuelve el registro de todas las reproducciones de la canción utilizando el beatmapID.
 - `!mapsuggest <jump/stream/+set(1000,999)>` - recomiendan mapas de stream o jump. [por 1000](https://redstar.moe/u/1000)
 - `!status` - Compruebe el estado del servidor. [Bancho](https://c.redstar.moe/api/v1/serverStatus), [lets](https://old.redstar.moe/letsapi/v1/status), [api](https://redstar.moe/api/v1/ping), [mediaserver](https://b.redstar.moe/status)
+- `!b <BeatmapID>` - Devuelve el enlace de osu!direct (b/)
+- `!d <BeatmapSetID>` - Devuelve el enlace de osu!direct (d/)
+- `!lb <std(s)/taiko(t)/ctb(c)/mania(m)> <vn/rx/ap>` - Devuelve el ranking
 
 ### Comandos de `!mp` (Torneo)
 - `!mp <subcommand>` - principal
@@ -73,6 +76,8 @@ Fokabot tiene algunos comandos similares a Tillerino. Esos comandos sólo funcio
 - `!last ap <username_safe>` - Muestra información (y los PPs obtenidos, si fue una puntuación de osu! standard) respecto a la última puntuación enviada por username (Autopilot)
 
 - `!with <mods>` - Muestra la cantidad de PP para el mapa anterior solicitado con los mods solicitados. Los mods soportados son `NF, EZ, HD, HR, DT, HT, NC, FL, SO.`. No utilice espacios para múltiples mods (por ejemplo: `!with HDHR`)
+
+- `!r` - Recomendar Beatmap Aleatorio (Calcula el PP promedio aplicando pesos a los 10 mejores registros de PP y dividiendo la suma ponderada por 10. En caso de que no haya modo, usa el PP máximo alcanzable como base y recomienda mapas en el estado clasificado o aprobado dentro de un rango ±50PP del PP promedio.)
 
 - `!token.tillerino` - Comprobar información de token.tillerino `[Beatmap_ID, mod (número), acc, by]`
 - `!del token.tillerino` - Borrar valor token.tillerino (reinicio) `[0, 0, -1.0, by !del token.tillerino]`
