@@ -502,8 +502,8 @@ def systemStatus(fro, chan, message):
 	msg += "Uptime: {}\n".format(data["uptime"])
 	msg += "\n"
 	msg += "=== SYSTEM STATS ===\n"
-	msg += "CPU: i5-2500 {}%\n".format(data["cpuUsage"])
-	msg += "RAM: {}GB/{}GB\n".format(data["usedMemory"], data["totalMemory"])
+	msg += "CPU: {} {}%\n".format(data["cpuName"], data["cpuUsage"])
+	msg += "RAM: {}GB/{}GB {}%\n".format(data["usedMemory"], data["totalMemory"], data["memoryUsage"])
 	if data["unix"]:
 		msg += "Load average: {}/{}/{}\n".format(data["loadAverage"][0], data["loadAverage"][1], data["loadAverage"][2])
 
