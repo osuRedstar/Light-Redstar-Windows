@@ -63,6 +63,8 @@ class config:
 			parsedConfig.get("server", "server-domain")
 
 			parsedConfig.get("osu", "apikey")
+			parsedConfig.get("osu", "bancho_username")
+			parsedConfig.get("osu", "bancho_password")
 
 			parsedConfig.get("cheesegull", "apiurl")
 			parsedConfig.get("cheesegull", "apikey")
@@ -135,6 +137,8 @@ class config:
 
 		self.config.add_section("osu")
 		self.config.set("osu", "apikey", "Your_osu_API_KEY")
+		self.config.set("osu", "bancho_username", "")
+		self.config.set("osu", "bancho_password", "")
 
 		self.config.add_section("cheesegull")
 		self.config.set("cheesegull", "apiurl", "http://localhost:6201/api")
