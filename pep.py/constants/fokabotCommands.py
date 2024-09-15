@@ -21,7 +21,6 @@ from objects import glob
 from helpers import chatHelper as chat
 from common.web import cheesegull
 from datetime import datetime
-import pytz
 from helpers import configHelper
 
 conf = configHelper.config("config.ini")
@@ -31,9 +30,9 @@ letsapiurl = conf.config["server"]["letsapiurl"].rstrip("/")
 
 def userDomainCheck():
 	try:
-		userDomain = glob.self.request.host.replace("c.", "")
+		userDomain = re.sub(r"^c\d*\.|^ce\.", "", glob.self.request.host)
 		return server_domain if userDomain == server_domain else userDomain
-	except Exception as e: print(e); return None
+	except Exception as e: print(e); return server_domain
 
 # Redstar, catboy, 네리냥, catboy, 치무, 블켓, 사요봇, 비트,
 def redstarMessage(beatmapID):
