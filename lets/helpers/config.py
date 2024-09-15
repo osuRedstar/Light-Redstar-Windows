@@ -76,6 +76,8 @@ class config:
 			self.config.get("osuapi", "enable")
 			self.config.get("osuapi", "apiurl")
 			self.config.get("osuapi", "apikey")
+			self.config.get("osuapi", "bancho_username")
+			self.config.get("osuapi", "bancho_password")
 
 			self.config.get("beatconnect", "enable")
 			self.config.get("beatconnect", "apikey")
@@ -143,6 +145,8 @@ class config:
 		self.config.set("osuapi", "enable", "True")
 		self.config.set("osuapi", "apiurl", "https://osu.ppy.sh")
 		self.config.set("osuapi", "apikey", "Your_Bancho_APIKKEY")
+		self.config.set("osuapi", "bancho_username", "")
+		self.config.set("osuapi", "bancho_password", "")
 
 		self.config.add_section("beatconnect")
 		self.config.set("beatconnect", "enable", "False")
