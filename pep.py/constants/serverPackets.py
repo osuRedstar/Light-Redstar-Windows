@@ -5,6 +5,7 @@ from constants import dataTypes
 from constants import packetIDs
 from constants import userRanks
 from helpers import packetHelper
+from helpers import countryHelper
 from objects import glob
 
 """ Login errors packets """
@@ -123,35 +124,17 @@ def userPanel(userID, force = False):
 		timezone = 24+9
 	else:
 		timezone = 24+userToken.timeOffset
-	# Custom Countries for Users
-	# 111 = Japan
-	# 118 = DPRK
-	# 119 = KR
-	# 180 = PW
-	# 36 = Belarus
-	if userID in (1000, 1001):
-		#country = 111
-		country = 118
-	#AU 리카 1014 아이디 (mrekk)
-	elif userID == 1014:
-		country = 16
-	#3번째 부계 XK
-	elif userID == 1165:
-		country = 0
-	#DPRK (KP) : papa212, kizuna music
-	elif userID == 1012 or userID == 1184 or userID == 1467:
-		country = 118
-	#Japan (JP) : Nerina, Schna, Kita Ikuyo
-	elif userID == 1131 or userID == 1124 or userID == 1002:
-		country = 111
-	elif userID == 8016:
-		country = 119
-	#Saint Helena (SH) : Izumi Sagiri
-	elif userID == 1353:
-		country = 193
 
-	else:
-		country = userToken.country
+	# Custom Countries for Users
+	if userID in (1000, 1001): country = countryHelper.getCountryID('KP')
+	elif userID in (1014,): country = countryHelper.getCountryID('AU') #AU 리카 1014 아이디 (mrekk)
+	elif userID in (1165,): country = countryHelper.getCountryID('XK') #3번째 부계 XK
+	elif userID in (1012, 1184, 1467): country = countryHelper.getCountryID('KP') #DPRK (KP) : papa212, kizuna music
+	elif userID in (1131, 1124, 1002): country = countryHelper.getCountryID('JP') #Japan (JP) : Nerina, Schna, Kita Ikuyo
+	elif userID in (1353,): country = countryHelper.getCountryID('SH') #Saint Helena (SH) : Izumi Sagiri
+	elif userID in (8016,): country = countryHelper.getCountryID('KR')
+	else: country = userToken.country
+
 	gameRank = userToken.gameRank
 	latitude = userToken.getLatitude()
 	longitude = userToken.getLongitude()
