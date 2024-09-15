@@ -10,6 +10,7 @@ from objects import glob
 from common.sentry import sentry
 import re
 from common import generalUtils
+import requests
 
 MODULE_NAME = "get_beatmapinfo"
 class handler(requestsManager.asyncRequestHandler):
@@ -22,7 +23,6 @@ class handler(requestsManager.asyncRequestHandler):
 	def asyncGet(self):
 		return
 	def asyncPost(self):
-		return
 		try:
 			# Check arguments
 			if not requestsManager.checkArguments(self.request.arguments, ["u", "h"]):
@@ -34,14 +34,34 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Login and ban check
 			userID = userUtils.getID(username)
-			if userID == 0:
-				return
+			if userID == 0: return
 			elif not userUtils.checkLogin(userID, password, self.getRequestIP()):
 				return self.set_status(403)
 
+			Bancho_u = glob.conf.config["osuapi"]["bancho_username"]
+			Bancho_p = glob.conf.config["osuapi"]["bancho_password"]
+			Bancho_p_hashed = generalUtils.stringMd5(Bancho_p)
+
 			data = json.loads(self.request.body)
-			result = []
+			cho = requests.get(f"https://osu.ppy.sh/web/osu-getbeatmapinfo.php?u={username}&h={password}", headers={"User-Agent": "osu!"}, json=data).content
+			if not cho:
+				cho = requests.get(f"https://osu.ppy.sh/web/osu-getbeatmapinfo.php?u={Bancho_u}&h={Bancho_p_hashed}", headers={"User-Agent": "osu!"}, json=data).content
+			if cho:
+				for d in cho.decode("utf-8").strip("\n").split("\n"):
+					d = d.split("|")
+					for m in range(4):
+						r = glob.db.fetch('''
+							SELECT play_mode, mods, accuracy, 300_count, 100_count, 50_count, misses_count
+							FROM scores WHERE userid = %s AND beatmap_md5 = %s AND completed = 3 AND play_mode = %s ORDER BY pp DESC LIMIT 1
+						''', [userID, d[3], m])
+						d[5+m] = generalUtils.getRank(r["play_mode"], r["mods"], r["accuracy"],r["300_count"], r["100_count"], r["50_count"], r["misses_count"]) if r else "N"
+					log.info("|".join(d))
+					self.write("|".join(d) + "\n")
+
+			#반초 요청으로 변경함
+			""" result = []
 			for num, filename in enumerate(data["Filenames"]):
+				log.info(f"Check {filename}")
 				try: #mediaserver's functions.py
 					parentheses = filename.count(" (")
 					if parentheses == 1:
@@ -137,13 +157,12 @@ class handler(requestsManager.asyncRequestHandler):
 						''', [userID, info['file_md5'], m])
 						if r is None: rank.append("N")
 						else: rank.append(generalUtils.getRank(r["play_mode"], r["mods"], r["accuracy"],r["300_count"], r["100_count"], r["50_count"], r["misses_count"]))
-				else:
-					continue
+				else: result.append(f"{num}|{-1}|{-1}|beatmap_md5|{-1}|N|N|N|N"); continue
 				result.append(f"{num}|{info['id']}|{info['parent_set_id']}|{info['file_md5']}|{info['ranked_status']}|{rank[0]}|{rank[1]}|{rank[2]}|{rank[3]}")
 
 			# '|'를 기준으로 파싱하고 두 번째 숫자를 기준으로 정렬
 			result = sorted(result, key=lambda x: int(x.split('|')[1]))
-			for r in result: self.write(f"{r}\n")
+			for r in result: self.write(f"{r}\n") """
 		except exceptions.invalidArgumentsException:
 			return
 		except Exception as e:
