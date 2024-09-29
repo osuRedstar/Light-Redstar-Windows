@@ -5,7 +5,7 @@ reference_version: 96a9ef2265cef92f7a7014f3303b74b9
 Si tienes problemas para conectarte a Redstar usando stable Estable/Beta/Cutting Edge o el switcher no instala el certificado correctamente, puedes instalarlo manualmente.
 
 ### Instrucciones
-- Primero, descargue el certificado [haciendo clic aquí](https://github.com/osuRedstar/Light-Redstar-Windows/raw/main/nginx/osu/cert/openssl/rootca.crt)
+- Primero, descargue el certificado [haciendo clic aquí](https://redstar.moe/rootca.crt)
 - A continuación, abra **certificate.cer**
 - Haga clic en **Instalar certificado...**
 - Haga clic en **Siguiente**

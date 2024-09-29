@@ -5,7 +5,7 @@ reference_version: 96a9ef2265cef92f7a7014f3303b74b9
 Jeśli masz problemy z połączeniem się z Redstar używając stable (latest)/beta/cuttingedge albo przełącznik nie instaluje poprawnie certyfikatu, możesz zainstalować certyfikat manualnie.
 
 ### Instrukcje
-- Najpierw, pobierz certyfikat [klikając tutaj](https://github.com/osuRedstar/Light-Redstar-Windows/raw/main/nginx/osu/cert/openssl/rootca.crt)
+- Najpierw, pobierz certyfikat [klikając tutaj](https://redstar.moe/rootca.crt)
 - Potem, otwórz **certificate.cer**
 - Kliknij **Zainstaluj certyfikat...**
 - Kliknij **Dalej**
