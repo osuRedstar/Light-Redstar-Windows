@@ -5,7 +5,7 @@ old_id: 12
 If you're having troubles connecting to Redstar or the switcher doesn't install the certificate properly, you can try installing it manually.
 
 ### Instructions
-- First, download the certificate [by clicking here](https://zxq.co/ripple/ripple-server-switcher/-/raw/master/RippleServerSwitcher/Resources/ripple.cer?inline=false)
+- First, download the certificate [by clicking here](https://github.com/osuRedstar/Light-Redstar-Windows/raw/main/nginx/osu/cert/openssl/rootca.crt)
 - Then, open **certificate.cer**
 - Click **Install certificate...**
 - Click **Next**

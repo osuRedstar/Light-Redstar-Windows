@@ -1,0 +1,36 @@
+(원본) nginx-1.16.1/
+.git/
+.vs/
+.vscode/
+api/
+avatar-server/
+avatar-server-old/
+discord.redstar.moe-nodejs/
+lazer/
+lets-old(데뱐소스 이전)/
+Maybe-Bot-main/
+Nerina/
+new.debian.moe/
+new.redstar.moe/
+nginx/
+nginx-1.23.3 (i-need-to.click)/
+nginx-1.23.3 (redstar.kp)/
+osr2mp4/
+osu-discord-webhook
+Redis/
+Redis-old/
+Redis-old2/
+Replay/
+SQL/
+데비안 소스코드/
+
+frontend/hanayo.conf
+frontend/static/1000
+mediaserver/data
+lets/.data
+lets/config.ini
+lets/.gitignore
+pep.py/.data
+pep.py/config.ini
+pep.py/config2.ini
+pep.py/.gitignore

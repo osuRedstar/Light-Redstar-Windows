@@ -5,7 +5,7 @@ reference_version: 4548a100846bda49251451f487abbdad
 Se riscontri dei problemi nel connetterti a Redstar o lo switcher non installa correttamente il certificato, puoi installare il certificato manualmente.
 
 ### Istruzioni
-- Per prima cosa, scarica il certificato [cliccando qui](https://zxq.co/ripple/ripple-server-switcher/-/raw/master/RippleServerSwitcher/Resources/ripple.cer?inline=false)
+- Per prima cosa, scarica il certificato [cliccando qui](https://github.com/osuRedstar/Light-Redstar-Windows/raw/main/nginx/osu/cert/openssl/rootca.crt)
 - In seguito, apri **certificate.cer**
 - Clicca **Installa certificato...**
 - Clicca **Avanti**

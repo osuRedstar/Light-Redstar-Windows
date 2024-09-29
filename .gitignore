@@ -4,3 +4,8 @@ nginx/temp/
 nginx/logs/
 ap/config.ini
 ap/__pycache__
+nginx/aodd/
+
+#temp
+lazer/
+SQL/py_gull.sql
