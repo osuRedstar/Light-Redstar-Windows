@@ -4,7 +4,6 @@ import urllib.request
 from common.log import logUtils as log
 from objects import glob
 
-
 def getCountry(ip):
 	"""
 	Get country from IP address using geoip api
