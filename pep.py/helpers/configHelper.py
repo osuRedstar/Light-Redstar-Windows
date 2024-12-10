@@ -175,7 +175,7 @@ class config:
 
 		self.config.add_section("localize")
 		self.config.set("localize", "enable", "1")
-		self.config.set("localize", "ipapiurl", "http://ip.zxq.co")
+		self.config.set("localize", "ipapiurl", "https://ip.zxq.co")
 
 		self.config.add_section("custom")
 		self.config.set("custom", "config", "common/config.json")
