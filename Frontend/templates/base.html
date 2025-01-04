@@ -133,7 +133,8 @@
 			var currentUserID = {{ .Context.User.ID }};
 		</script>
 		{{/* If we got some more scripts to print, print'em */}}
-		<script src="//twemoji.maxcdn.com/2/twemoji.min.js?2.2"></script>
+		<!-- <script src="//twemoji.maxcdn.com/2/twemoji.min.js?2.2"></script> --> <!-- 해당 서비스 종료로 인한 페이지 로딩속도 느림 문제 떄문에 주석처리 하고 아카이브로 대체함 -->
+		<script src="https://web.archive.org/web/20230103141442js_/https://twemoji.maxcdn.com/2/twemoji.min.js?2.2"></script>
 		<script src="/static/dist.min.js?{{ unixNano }}"></script>
 		<script src="/static/timeago-locale/jquery.timeago.{{ with $lang }}{{ . }}{{end}}.js"></script>
 		{{ if .Scripts }}

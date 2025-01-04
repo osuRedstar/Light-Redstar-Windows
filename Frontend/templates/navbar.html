@@ -53,7 +53,8 @@
 			</div>
 			{{ end }}
 			{{ navbarItem .Path (.T "Donate" | printf "<i class=\"red heart icon\"></i>%s") "/donate" }}
-			{{ if $isAdmin }}{{ navbarItem .Path (.T "AAP" | printf "<b>%s</b>") "https://redstar.moe/index.php?p=100" }}{{ end }}
+			<!-- {{ if $isAdmin }}{{ navbarItem .Path (.T "AAP" | printf "<b>%s</b>") "https://redstar.moe/index.php?p=100" }}{{ end }} -->
+			{{ if $isAdmin }}{{ navbarItem .Path (.T "Realistik Panel" | printf "<b>%s</b>") "https://admin.redstar.moe" }}{{ end }}
 			{{ end }}
 		<div class="firetrucking-right-menu">
 			<div class="item">
