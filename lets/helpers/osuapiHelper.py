@@ -1,4 +1,5 @@
 import json
+import os
 from urllib.parse import quote
 
 import requests
@@ -11,6 +12,7 @@ from constants import exceptions
 from helpers import config
 conf = config.config("config.ini")
 server_domain = conf.config["server"]["server-domain"]
+beatmapspath = conf.config["server"]["beatmapspath"]
 
 #def osuApiRequest(request, params, getFirst=True):
 def osuApiRequest(request, params, getFirst=True, checkpp=False):
@@ -87,16 +89,21 @@ def getOsuFileFromName(fileName):
 		URL = "https://b.{}/web/maps/{}".format(server_domain, quote(fileName))
 		log.info(f"lets/helpers/osuapiHelper.py/ getOsuFileFromName(fileName) | URL = {URL}")
 		req = requests.get(URL, headers=requestHeaders, timeout=30)
-		req.encoding = "utf-8"
 		response = req.content
 
 		if req.status_code != 200:
-			URL = "{}/web/maps/{}".format(glob.conf.config["osuapi"]["apiurl"], quote(fileName))
-			log.error(f"b.{server_domain}/web/maps 에러")
-			log.info(f"lets/helpers/osuapiHelper.py/ getOsuFileFromName(fileName) | URL = {URL}")
-			req = requests.get(URL, headers=requestHeaders, timeout=30)
-			req.encoding = "utf-8"
-			response = req.content
+			bfi = requests.get(f"https://b.{server_domain}/filesinfo/{fileName}", headers=requestHeaders, timeout=10)
+			try:
+				bid = int(bfi.url.split('/')[-1])
+				if os.path.isfile(f"{beatmapspath}/{bid}.osu") and bid < 0:
+					log.info(f"{fileName} --> {bid} | {beatmapspath}/{bid}.osu 에 커스텀 비트맵 존재하므로 반환함")
+					with open(f"{beatmapspath}/{bid}.osu", "rb") as f: response = f.read()
+			except:
+				URL = "{}/web/maps/{}".format(glob.conf.config["osuapi"]["apiurl"], quote(fileName))
+				log.error(f"b.{server_domain}/web/maps 에러")
+				log.info(f"lets/helpers/osuapiHelper.py/ getOsuFileFromName(fileName) | URL = {URL}")
+				req = requests.get(URL, headers=requestHeaders, timeout=30)
+				response = req.content
 	finally:
 		glob.dog.increment(glob.DATADOG_PREFIX+".osu_api.osu_file_requests")
 		return response
