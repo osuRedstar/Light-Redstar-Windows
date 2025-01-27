@@ -16,7 +16,7 @@ Khi bạn đã mở nó, copy paste 2 dòng dưới đây vào cuối trang:
 **CTRL+X** và **Enter** để lưu tệp.
 
 ### Cài đặt certificate
-Tải certificate bằng cách nhấp vào [*đây*](https://redstar.moe/rootca.crt)
+Tải certificate bằng cách nhấp vào [*đây*](https://redstar.moe/cert.crt)
 
 Mở cấu hình của Internet Explorer (configuration) bằng cách chạy `wine control`.
 

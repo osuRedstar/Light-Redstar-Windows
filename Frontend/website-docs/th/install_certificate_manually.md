@@ -5,8 +5,8 @@ reference_version: 4548a100846bda49251451f487abbdad
 If you're having troubles connecting to Redstar or the switcher doesn't install the certificate properly, you can try installing it manually.
 
 ### Instructions
-- First, download the certificate [by clicking here](https://redstar.moe/rootca.crt)
-- Then, open **certificate.cer**
+- First, download the certificate [by clicking here](https://redstar.moe/cert.crt)
+- Then, open **cert.crt**
 - Click **Install certificate...**
 - Click **Next**
 - Select **Place all certificates in the following store** (second option), then click **Browse...**

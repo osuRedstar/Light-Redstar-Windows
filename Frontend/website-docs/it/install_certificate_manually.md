@@ -5,8 +5,8 @@ reference_version: 4548a100846bda49251451f487abbdad
 Se riscontri dei problemi nel connetterti a Redstar o lo switcher non installa correttamente il certificato, puoi installare il certificato manualmente.
 
 ### Istruzioni
-- Per prima cosa, scarica il certificato [cliccando qui](https://redstar.moe/rootca.crt)
-- In seguito, apri **certificate.cer**
+- Per prima cosa, scarica il certificato [cliccando qui](https://redstar.moe/cert.crt)
+- In seguito, apri **cert.crt**
 - Clicca **Installa certificato...**
 - Clicca **Avanti**
 - Seleziona **Posiziona tutti i certificati nel seguente archivio** (seconda opzione), poi clicca **Sfoglia...**

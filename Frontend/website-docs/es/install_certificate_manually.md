@@ -5,8 +5,8 @@ reference_version: 96a9ef2265cef92f7a7014f3303b74b9
 Si tienes problemas para conectarte a Redstar usando stable Estable/Beta/Cutting Edge o el switcher no instala el certificado correctamente, puedes instalarlo manualmente.
 
 ### Instrucciones
-- Primero, descargue el certificado [haciendo clic aquí](https://redstar.moe/rootca.crt)
-- A continuación, abra **certificate.cer**
+- Primero, descargue el certificado [haciendo clic aquí](https://redstar.moe/cert.crt)
+- A continuación, abra **cert.crt**
 - Haga clic en **Instalar certificado...**
 - Haga clic en **Siguiente**
 - Seleccione **Colocar todos los certificados en el siguiente almacén** (segunda opción), luego haga clic en **Buscar...**
