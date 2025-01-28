@@ -2,7 +2,7 @@ import struct
 import datetime
 import json
 import io
-import sys
+import os
 import traceback
 
 import tornado.gen
@@ -18,7 +18,8 @@ from helpers import osuapiHelper
 from objects import glob
 from common.sentry import sentry
 
-from common.ripple import userUtils
+from common.ripple import scoreUtils
+from common import generalUtils
 
 
 
@@ -97,37 +98,26 @@ class handler(requestsManager.asyncRequestHandler):
             log.info(f'Parsing Replay File!{" For Download File" if dl else ""} | {self.request.files["score"][0]["filename"]}')
 
             def dotTicksToUnix(dotnet_ticks):
-                base = datetime.datetime(1, 1, 1)
-                delta = datetime.timedelta(microseconds=dotnet_ticks/10)
-                timestamp = base + delta
+                timestamp = datetime.datetime(1, 1, 1, tzinfo=datetime.timezone.utc) + datetime.timedelta(microseconds=dotnet_ticks/10)
                 return int(timestamp.timestamp())
 
             def readULEB128(data):
-                result = 0
-                shift = 0
+                result = shift = 0
                 while True:
                     byte = data.read(1)
-                    if not byte:
-                        raise ValueError("Unexpected end of data while reading ULEB128")
-                    byte = ord(byte)
-                    result |= (byte & 0x7F) << shift
-                    shift += 7
-                    if not byte & 0x80:
-                        break
+                    if not byte: raise ValueError("Unexpected end of data while reading ULEB128")
+                    byte = ord(byte); result |= (byte & 0x7F) << shift; shift += 7
+                    if not byte & 0x80: break
                 return result
 
             def unpackString(data):
                 indicator = data.read(1)
-                if indicator == b"\x00":
-                    return ""
-                elif indicator == b"\x0b":
-                    length = readULEB128(data)
-                    return data.read(length).decode('utf-8')
-                else:
-                    raise ValueError("Invalid string indicator")
+                if indicator == b"\x00": return ""
+                elif indicator == b"\x0b": return data.read(readULEB128(data)).decode('utf-8')
+                else: raise ValueError("Invalid string indicator")
 
             def unpackReplayData(data):
-                data = io.BytesIO(data)  # BytesIO 객체 생성
+                data = io.BytesIO(data) #BytesIO 객체 생성
                 play_mode = struct.unpack("<B", data.read(1))[0]
                 version = struct.unpack("<I", data.read(4))[0]
                 beatmap_md5 = unpackString(data)
@@ -149,6 +139,13 @@ class handler(requestsManager.asyncRequestHandler):
                 id = struct.unpack("<Q", data.read(8))[0]
 
                 if dl: return rawReplay
+                acc = generalUtils.getAcc(play_mode, count_300, count_100, count_50, gekis_count, katus_count, misses_count)
+                bid = glob.db.fetch("SELECT beatmap_id FROM beatmaps WHERE beatmap_md5 = %s", [beatmap_md5])["beatmap_id"]
+                if bid:
+                    cmd = f'pp\\oppai-ng\\oppai.exe ".data\\beatmaps\\{bid}.osu" {acc}% -m1 +{scoreUtils.readableMods(mods)} {max_combo}x {misses_count}xm -m{play_mode} -ojson'
+                    log.debug(cmd)
+                    with os.popen(cmd) as c: pp = json.loads(c.buffer.read().decode("utf-8"))
+                else: pp = None
                 return json.dumps(
                     {
                         "dlLink": "https://" + self.request.host + self.request.uri + "?dl",
@@ -170,18 +167,13 @@ class handler(requestsManager.asyncRequestHandler):
                         "mods": mods,
                         "life_bar_graph": life_bar_graph,
                         "time": time,
+                        "acc": acc,
+                        "oppai": pp,
                         "rawReplay": str(rawReplay)
-                    }, indent=2
+                    }, indent=2, ensure_ascii=False
                 )
-
             scoreData = unpackReplayData(scoreDataEnc)
-        
-        except Exception as e:
-            log.error(e)
+        except: log.error(traceback.format_exc())
         finally:
-            if dl:
-                self.set_header('Content-Type', self.request.files["score"][0]["content_type"])
-                self.write(scoreData)
-            else:
-                self.set_header("Content-Type", "application/json")
-                self.write(scoreData)
+            if dl: self.set_header('Content-Type', self.request.files["score"][0]["content_type"]); self.write(scoreData)
+            else: self.set_header("Content-Type", "application/json"); self.write(scoreData)
