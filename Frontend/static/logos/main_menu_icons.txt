@@ -1,0 +1,2 @@
+main_menu_icons.png --> ? x 86
+main_menu_icons@2x.png --> ? x 172
