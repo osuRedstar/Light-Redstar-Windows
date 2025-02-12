@@ -241,7 +241,6 @@ class handler(requestsManager.asyncRequestHandler):
 		self.add_header("cho-protocol", "19")
 		self.add_header("Connection", "keep-alive")
 		self.add_header("Keep-Alive", "timeout=5, max=100")
-		self.add_header("Content-Type", "text/html; charset=UTF-8")
 
 	@tornado.web.asynchronous
 	@tornado.gen.engine
