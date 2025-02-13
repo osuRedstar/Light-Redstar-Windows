@@ -5,6 +5,7 @@ nginx/logs/
 ap/config.ini
 ap/__pycache__
 nginx/aodd/
+dev/
 
 #temp
 lazer/
