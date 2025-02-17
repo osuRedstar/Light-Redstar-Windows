@@ -44,15 +44,6 @@ def redstarMessage(beatmapID):
 		sn = beatmap["song_name"]
 	)
 
-def catboyMessage(beatmapID):
-	beatmap = glob.db.fetch("SELECT song_name, beatmapset_id FROM beatmaps WHERE beatmap_id = %s LIMIT 1", [beatmapID])
-	if beatmap is None:
-		return "Sorry, I'm not able to provide a download link for this map :("
-	return "Download [https://catboy.best/d/{bsid} {sn}] from Redstar, or [osu://dl/{bsid} osu!direct]".format(
-		bsid = beatmap["beatmapset_id"],
-		sn = beatmap["song_name"]
-	)
-
 def nerinyanMessage(beatmapID):
 	beatmap = glob.db.fetch("SELECT song_name, beatmapset_id FROM beatmaps WHERE beatmap_id = %s LIMIT 1", [beatmapID])
 	if beatmap is None:
@@ -121,7 +112,7 @@ def mirrorMessage(beatmapID):
 		beatmap = glob.db.fetch(sql, [beatmapID])
 		if beatmap is None:
 			return "Sorry, I'm not able to provide a download link for this map :("
-	return "Download [https://osu.ppy.sh/d/{bsid} {sn}] from [https://redstar.moe/d/{bsid} Redstar], [https://nerinyan.moe/d/{bsid} NeriNyan], [https://catboy.best/d/{bsid} catboy] [https://chimu.moe/d/{bsid} chimu], [https://chimu.moe/d/{bsid} Bloodcat], [https://txy1.sayobot.cn/beatmaps/download/full/{bsid} sayobot], [https://beatconnect.io/b/{bsid} Beatconnect] or [osu://dl/{bsid} osu!direct].".format(
+	return "Download [https://osu.ppy.sh/s/{bsid} {sn}] from [https://redstar.moe/d/{bsid} Redstar], [https://nerinyan.moe/d/{bsid} NeriNyan], [https://catboy.best/d/{bsid} catboy], [https://chimu.moe/d/{bsid} chimu], [https://chimu.moe/d/{bsid} Bloodcat], [https://txy1.sayobot.cn/beatmaps/download/full/{bsid} sayobot], [https://beatconnect.io/b/{bsid} Beatconnect] or [osu://dl/{bsid} osu!direct].".format(
 		bsid = beatmap["beatmapset_id"],
 		sn = beatmap["song_name"]
 	)
