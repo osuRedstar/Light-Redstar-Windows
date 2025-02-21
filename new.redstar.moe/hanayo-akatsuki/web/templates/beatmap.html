@@ -201,9 +201,7 @@
                     <span id="PlayState">
                       Play Song
                     </span>
-                  </a>
-                  <a class="ui blue labeled icon button">
-                    <i id="imageplay2" class="play icon"></i>
+                    <br><br>
                     <span id="current_time" style="color: red;">								
                       &#11014 wait a sec...
                     </span>
@@ -294,9 +292,6 @@
             document.getElementById("PlayState").innerHTML = PlayText;
             document.getElementById("imageplay").classList.remove('pause');
             document.getElementById("imageplay").classList.add('play');
-
-            document.getElementById("imageplay2").classList.remove('pause');
-            document.getElementById("imageplay2").classList.add('play');
           } else {
             console.log(`Audio Volume = ${audio.volume}`)
 
@@ -304,9 +299,6 @@
             document.getElementById("PlayState").innerHTML = PauseText;
             document.getElementById("imageplay").classList.remove('play');
             document.getElementById("imageplay").classList.add('pause');
-
-            document.getElementById("imageplay2").classList.remove('play');
-            document.getElementById("imageplay2").classList.add('pause');
           }
         };
         audio.onplaying = function() {
@@ -321,9 +313,6 @@
           document.getElementById("PlayState").innerHTML = PlayText;
           document.getElementById("imageplay").classList.remove('pause');
           document.getElementById("imageplay").classList.add('play');
-
-          document.getElementById("imageplay2").classList.remove('pause');
-          document.getElementById("imageplay2").classList.add('play');
         });
       </script>
 
