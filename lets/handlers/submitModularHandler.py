@@ -311,8 +311,8 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Restrict obvious cheaters
 			#특정 userID Restricted 방지
-			noRestrictedUsers = [1000, 1001, 1014]
-			#Debian(1000), Im Not Debian(1001), anireN Fanboy(1014)
+			noRestrictedUsers = [1000, 1001, 1014, 1779, 1793]
+			#Debian(1000), Im Not Debian(1001), anireN Fanboy(1014), Lily(1779), web21(1793)
 			if userID not in noRestrictedUsers:
 				if UsingRelax: 
 					if (glob.conf.extra["lets"]["submit"]["max-std-rx-pp"] >= 0 and s.pp >= glob.conf.extra["lets"]["submit"]["max-std-rx-pp"] and s.gameMode == gameModes.STD) and not restricted:
