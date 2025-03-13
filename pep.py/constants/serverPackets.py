@@ -1,5 +1,5 @@
 """ Contains functions used to write specific server packets to byte streams """
-from common.constants import privileges
+from common.constants import privileges, actions
 from common.ripple import userUtils
 from constants import dataTypes
 from constants import packetIDs
@@ -175,11 +175,29 @@ from common.log import logUtils as log
 def userStats(userID, force = False):
 	# Get userID's token from tokens list
 	userToken = glob.tokens.getTokenFromUserID(userID)
-	if userToken is None or ((userToken.restricted or userToken.irc or userToken.tournament) and not force):
+	#if userToken is None or ((userToken.restricted or userToken.irc or userToken.tournament) and not force):
+	if userToken is None or ((userToken.restricted or userToken.tournament) and not force):
 		return bytes()
 	
-	log.warning("[userToken.pp if userToken.pp > 0 else 0, dataTypes.UINT64] = {}".format([userToken.pp if userToken.pp > 0 else 0, dataTypes.UINT64]))
-	
+	if userToken.irc:
+		return packetHelper.buildPacket(packetIDs.server_userStats,
+		[
+			[userID, dataTypes.UINT32],
+			[actions.AFK, dataTypes.BYTE],
+			["on IRC", dataTypes.STRING],
+			[userToken.actionMd5, dataTypes.STRING],
+			[userToken.actionMods, dataTypes.SINT32],
+			[userToken.gameMode, dataTypes.BYTE],
+			[userToken.beatmapID, dataTypes.SINT32],
+			[userToken.rankedScore, dataTypes.UINT64],
+			[userToken.accuracy, dataTypes.FFLOAT],
+			[userToken.playcount, dataTypes.UINT32],
+			[userToken.totalScore, dataTypes.UINT64],
+			[userToken.gameRank, dataTypes.UINT32],
+			[userToken.pp, dataTypes.UINT64]
+		])
+
+	log.warning("[userToken.pp, dataTypes.UINT64] = {}".format([userToken.pp, dataTypes.UINT64]))
 	return packetHelper.buildPacket(packetIDs.server_userStats,
 	[
 		[userID, dataTypes.UINT32],
@@ -195,7 +213,7 @@ def userStats(userID, force = False):
 		[userToken.totalScore, dataTypes.UINT64],
 		[userToken.gameRank, dataTypes.UINT32],
 		#[userToken.pp if 65535 >= userToken.pp > 0 else 0, dataTypes.UINT16]
-		[userToken.pp if userToken.pp > 0 else 0, dataTypes.UINT64]
+		[userToken.pp, dataTypes.UINT64]
 	])
 
 
