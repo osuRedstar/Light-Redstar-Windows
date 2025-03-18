@@ -106,10 +106,9 @@ def getSystemInfo():
 	seconds = math.floor(delta)
 
 	if not data["unix"]:
-		data["cpuName"] = os.popen("wmic cpu get name").read().split("\n\n")[1].split(" ")[2]
-	else:
-		n = os.popen("lscpu").read()
-		data["cpuName"] = n[n.find('Model name:'):].split("\n")[0].split(" ")[-4]
+		try: data["cpuName"] = os.popen("wmic cpu get name").read().split("\n\n")[1].split(" ")[2]
+		except: data["cpuName"] = os.popen('powershell -Command "Get-CimInstance -ClassName Win32_Processor | Select-Object Name"').read().split(" ")[-4]
+	else: data["cpuName"] = os.popen("lscpu | grep 'Model name:'").read().split(" ")[-4]
 
 	data["uptime"] = "{}d {}h {}m {}s".format(days, hours, minutes, seconds)
 	data["cpuUsage"] = psutil.cpu_percent()
@@ -120,9 +119,7 @@ def getSystemInfo():
 	data["memoryUsage"] = round(float(data["usedMemory"]) / float(data["totalMemory"]) * 100, 1)
 
 	# Unix only stats
-	if data["unix"]:
-		data["loadAverage"] = os.getloadavg()
-	else:
-		data["loadAverage"] = (0,0,0)
+	if data["unix"]: data["loadAverage"] = os.getloadavg()
+	else: data["loadAverage"] = (0,0,0)
 
 	return data
