@@ -6,6 +6,7 @@ import threading
 import traceback
 from urllib.parse import urlencode
 import math
+import time
 
 import requests
 import tornado.gen
@@ -98,6 +99,20 @@ class handler(requestsManager.asyncRequestHandler):
 			# Get score data
 			log.debug("Decrypting score data...")
 			scoreData = aeshelper.decryptRinjdael(aeskey, iv, scoreDataEnc, True).split(":")
+
+			try:
+				log.debug2(scoreData)
+				osu_client_hash = aeshelper.decryptRinjdael(aeskey, iv, self.get_argument("s"), True) #client_hash_b64 --> decode
+				coc = aeshelper.compute_online_checksum(scoreData, osu_client_hash, self.get_argument("sbk", ""))
+				log.debug2(f"scoreData[2] == coc = {scoreData[2] == coc}\n{coc}")
+				aes_new = aeshelper.encryptRinjdael(aeskey, iv, ":".join(scoreData), True)
+				log.debug2(f"scoreDataEnc == aes_new = {scoreDataEnc == aes_new}\n{aes_new}")
+				time_obj = time.strptime(scoreData[16], '%y%m%d%H%M%S')
+				unixtime2 = int(time.mktime(time_obj) - time.timezone)
+				log.debug2(f"{scoreData[16]} --> {unixtime2} | {int(time.time())}")
+			except: log.error(traceback.format_exc())
+
+
 			if len(scoreData) < 16 or len(scoreData[0]) != 32:
 				return
 			username = scoreData[1].strip()
@@ -310,10 +325,8 @@ class handler(requestsManager.asyncRequestHandler):
 
 
 			# Restrict obvious cheaters
-			#특정 userID Restricted 방지
-			noRestrictedUsers = [1000, 1001, 1014, 1779, 1793]
-			#Debian(1000), Im Not Debian(1001), anireN Fanboy(1014), Lily(1779), web21(1793)
-			if userID not in noRestrictedUsers:
+			verifyBadges = [b['user'] for b in glob.db.fetchAll("SELECT user FROM user_badges WHERE badge = 1028 ORDER BY user")]
+			if userID not in verifyBadges:
 				if UsingRelax: 
 					if (glob.conf.extra["lets"]["submit"]["max-std-rx-pp"] >= 0 and s.pp >= glob.conf.extra["lets"]["submit"]["max-std-rx-pp"] and s.gameMode == gameModes.STD) and not restricted:
 						#userUtils.restrict(userID)
