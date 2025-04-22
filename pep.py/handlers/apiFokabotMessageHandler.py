@@ -26,11 +26,12 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Check ci key
 			key = self.get_argument("k")
-			if key is None or key != glob.conf.config["server"]["cikey"]:
-				raise exceptions.invalidArgumentsException()
+			if key is None or key != glob.conf.config["server"]["cikey"]: raise exceptions.invalidArgumentsException()
+
+			fro = self.get_argument("fro", None)
 
 			chatHelper.sendMessage(
-				glob.BOT_NAME,
+				glob.BOT_NAME if not fro else fro,
 				#self.get_argument("to").encode().decode("ASCII", "ignore"),
 				#self.get_argument("msg").encode().decode("ASCII", "ignore")
 				self.get_argument("to").encode().decode("latin-1", "ignore"),
