@@ -284,7 +284,7 @@ def sendMessage(fro = "", to = "", message = "", token = None, toIRC = True):
 				glob.ircServer.banchoMessage(fro, to, line)
 
 		# Spam protection (ignore the bot)
-		if token.userID > 999:
+		if token.userID > 999 and not token.admin and not any(b['badge'] == 1028 or b['name'] == 'verified' for b in token.badges):
 			token.spamProtection()
 
 		# Some bot message

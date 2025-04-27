@@ -29,6 +29,7 @@ class token:
 		self.userID = userID
 		self.username = userUtils.getUsername(self.userID)
 		self.safeUsername = userUtils.getSafeUsername(self.userID)
+		self.badges = userUtils.getBadges(self.userID)
 		self.privileges = userUtils.getPrivileges(self.userID)
 		self.admin = userUtils.isInPrivilegeGroup(self.userID, "developer")\
 					 or userUtils.isInPrivilegeGroup(self.userID, "community manager")\
@@ -440,12 +441,9 @@ class token:
 		:return:
 		"""
 		# Increase the spam rate if needed
-		if increaseSpamRate:
-			self.spamRate += 1
-
+		if increaseSpamRate: self.spamRate += 1
 		# Silence the user if needed
-		if self.spamRate > 10:
-			self.silence(1800, "Spamming (auto spam protection)")
+		if self.spamRate > 50: self.silence(1800, "Spamming (auto spam protection)")
 
 	def isSilenced(self):
 		"""
