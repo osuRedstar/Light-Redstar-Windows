@@ -87,4 +87,5 @@ class handler(requestsManager.asyncRequestHandler):
 			)
 			fileNameShort = params[6][:32]+"..." if len(params[6]) > 32 else params[6][:-4]
 			log.info(f"Saved beatmap {fileNameShort} ({params[4]})")
-		self.write(json.dumps(mainData, indent=2))
+		self.set_header("Content-Type", "application/json")
+		self.write(json.dumps(mainData, indent=2, ensure_ascii=False))
