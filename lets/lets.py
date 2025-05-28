@@ -59,10 +59,7 @@ from objects import glob
 from pubSubHandlers import beatmapUpdateHandler
 import secret.achievements.utils
 
-from handlers import findBeatmapMd5Handler
-from handlers import getfriends
-from handlers import replayParserHandler
-from handlers import give_betatagHandler
+from handlers import findBeatmapMd5Handler, getfriends, replayParserHandler, give_betatagHandler, beatmapSaveDB
 
 from handlers import bmsubmitGetid
 from handlers import getBeatmapTopic
@@ -80,6 +77,7 @@ def make_app():
 		(r"/web/osu-getfriends.php", getfriends.handler),
 		(r"/web/replayparser", replayParserHandler.handler),
 		(r"/web/frontend/give-betatag/(.*)", give_betatagHandler.handler),
+		(r"/letsapi/v1/savedb", beatmapSaveDB.handler),
 
 		#Beatmap Submit System
 		(r"/web/osu-osz2-bmsubmit-getid.php", bmsubmitGetid.handler),
