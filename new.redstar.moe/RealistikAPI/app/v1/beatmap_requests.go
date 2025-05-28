@@ -23,7 +23,7 @@ type rankRequestsStatusResponse struct {
 // BeatmapRankRequestsStatusGET gets the current status for beatmap ranking requests.
 func BeatmapRankRequestsStatusGET(md common.MethodData) common.CodeMessager {
 	c := common.GetConf()
-	rows, err := md.DB.Query("SELECT userid, time FROM rank_requests WHERE time > ? ORDER BY id ASC LIMIT "+strconv.Itoa(c.RankQueueSize), time.Now().Add(-time.Hour*24).Unix())
+	rows, err := md.DB.Query("SELECT userid, time FROM rank_requests WHERE time > ? AND active = 1 ORDER BY id ASC LIMIT "+strconv.Itoa(c.RankQueueSize), time.Now().Add(-time.Hour*24).Unix())
 	if err != nil {
 		md.Err(err)
 		return Err500
@@ -131,8 +131,8 @@ func BeatmapRankRequestsSubmitPOST(md common.MethodData) common.CodeMessager {
 		t = "s"
 		v = d.SetID
 	}
-	err = md.DB.QueryRow("SELECT 1 FROM rank_requests WHERE bid = ? AND type = ? AND time > ?",
-		v, t, time.Now().Add(-time.Hour*24).Unix()).Scan(new(int))
+	err = md.DB.QueryRow("SELECT 1 FROM rank_requests WHERE bid = ? AND time > ? AND active = 1",
+		v, time.Now().Add(-time.Hour*24).Unix()).Scan(new(int))
 
 	// error handling
 	switch err {
@@ -148,7 +148,7 @@ func BeatmapRankRequestsSubmitPOST(md common.MethodData) common.CodeMessager {
 	}
 
 	_, err = md.DB.Exec(
-		"INSERT INTO rank_requests (userid, bid, type, time, blacklisted) VALUES (?, ?, ?, ?, 0)",
+		"INSERT INTO rank_requests (userid, bid, time, blacklisted, active) VALUES (?, ?, ?, 0, 1)",
 		md.ID(), v, t, time.Now().Unix())
 	if err != nil {
 		md.Err(err)

@@ -62,6 +62,7 @@ MinPrivileges=2
 							let o = t.exec(i);
 							
 							const Http_setQualified = new XMLHttpRequest();
+							// /frontend/rank_request/set_qualified/(b|s)/(id) 제거함
 							const url_setQualified ="https://admin.redstar.moe/frontend/rank_request/set_qualified/" + o[1] + "/" + o[2];
 							Http_setQualified.open('GET', url_setQualified);
 							Http_setQualified.send();

@@ -79,6 +79,7 @@ class config:
 
 			parsedConfig.get("discord", "enable")
 			parsedConfig.get("discord", "anticheat")
+			parsedConfig.get("discord", "rankreq")
 			parsedConfig.get("discord", "ranked-std")
 			parsedConfig.get("discord", "ranked-taiko")
 			parsedConfig.get("discord", "ranked-ctb")
@@ -157,6 +158,7 @@ class config:
 		self.config.add_section("discord")
 		self.config.set("discord", "enable", "0")
 		self.config.set("discord", "anticheat", "")
+		self.config.set("discord", "rankreq", "")
 		self.config.set("discord", "ranked-std", "")
 		self.config.set("discord", "ranked-taiko", "")
 		self.config.set("discord", "ranked-ctb", "")

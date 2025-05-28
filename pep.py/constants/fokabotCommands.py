@@ -22,11 +22,17 @@ from helpers import chatHelper as chat
 from common.web import cheesegull
 from datetime import datetime
 from helpers import configHelper
+from discord_webhook import DiscordWebhook, DiscordEmbed
+import traceback
 
 conf = configHelper.config("config.ini")
 bancho_api_key = conf.config["osu"]["apikey"]
+FokaKey = conf.config["server"]["cikey"]
 server_domain = conf.config["server"]["server-domain"]
 letsapiurl = conf.config["server"]["letsapiurl"].rstrip("/")
+requestHeaders = {"User-Agent": f"c.{server_domain}"}
+
+def exceptionE(msg=""): e = traceback.format_exc(); log.error(f"{msg} \n{e}"); return e
 
 def userDomainCheck():
 	try:
@@ -649,8 +655,8 @@ def tillerinoNp(fro, chan, message):
 			by_message = "by /np"
 		except:
 			log.debug("RGX 실패!")
-			beatmapID = fokabot.RGX(beatmapURL)[0]
-			log.info(f"tillerinoNp() beatmapID = {beatmapID}")
+			beatmapSetID = fokabot.RGX(beatmapURL)[0]
+			log.info(f"tillerinoNp() beatmapSetID = {beatmapSetID}")
 			by_message = "by /np"
 
 		# Update latest tillerino song for current token
@@ -1056,7 +1062,7 @@ def tillerinoLast(fro, chan, message, bpp_command = False):
 
 
 def getBeatmapRequest(fro, chan, message): # Grab a random beatmap request. TODO: Add gamemode handling to this and !request
-	request = glob.db.fetch("SELECT * FROM rank_requests LIMIT 1;")
+	request = glob.db.fetch("SELECT * FROM rank_requests WHERE active = 1 LIMIT 1;")
 	if request is not None:
 		username = userUtils.getUsername(request['userid'])
 		mapData = glob.db.fetch("SELECT song_name, ranked FROM beatmaps WHERE beatmap_id = {} ORDER BY difficulty_std DESC LIMIT 1;".format(request['bid']))
@@ -1734,14 +1740,9 @@ def editMap(fro, chan, message): # Using Atoka's editMap with Aoba's edit
 	rankType = message[0]
 	mapType = message[1]
 	mapID = message[2]
-	try:
-		Force = message[3].lower() == "force"
-	except:
-		Force = False
-	if Force:
-		ForceMessage = "(Force) | "
-	else:
-		ForceMessage = ""
+	try: Force = message[3].lower() == "force"
+	except: Force = False
+	ForceMessage = "(Force) | " if Force else ""
 
 	# Get persons userID, privileges, and token
 	userID = userUtils.getID(fro)
@@ -1755,18 +1756,14 @@ def editMap(fro, chan, message): # Using Atoka's editMap with Aoba's edit
 
 	# Grab beatmapData from db
 	try:
-		beatmapData = glob.db.fetch("SELECT beatmapset_id, song_name, ranked FROM beatmaps WHERE beatmap_id = {} LIMIT 1".format(mapID))
+		beatmapData = glob.db.fetch("SELECT beatmapset_id, song_name, ranked FROM beatmaps WHERE beatmap_id = %s LIMIT 1", [mapID])
 		BmapName = beatmapData['song_name'].split("[")[0].rstrip()
 	except:
 		return "We could not find that beatmap. Perhaps check you are using the BeatmapID (not BeatmapSetID), and typed it correctly."
 
-	if 's' in mapType.lower():
-		mapType = 'set'
-	#elif 'd' in mapType.lower() or 'm' in mapType.lower():
-	elif 'b' in mapType.lower() or 'm' in mapType.lower():
-		mapType = 'map'
-	else:
-		return "Please specify whether your request is a single difficulty, or a full set (map/set). Example: '!map unrank/rank/love set/map 256123 mania'."
+	if 's' in mapType.lower(): mapType = 'set'
+	elif 'b' in mapType.lower() or 'm' in mapType.lower(): mapType = 'map'
+	else: return "Please specify whether your request is a single difficulty, or a full set (map/set). Example: '!map unrank/rank/love set/map 256123 mania'."
 
 	#비트맵의 개수가 RedstarDB랑 맞지 않으면 거절
 	param = {'k': bancho_api_key, 's': beatmapData['beatmapset_id']}
@@ -1774,8 +1771,8 @@ def editMap(fro, chan, message): # Using Atoka's editMap with Aoba's edit
 	beatmap_count_check = beatmap_count_check.json()
 	beatmap_count_check = len(beatmap_count_check)
 
-	beatmap_count_check_redstar = glob.db.fetchAll("SELECT beatmap_id FROM beatmaps WHERE beatmapset_id = {}".format(beatmapData['beatmapset_id']))
-	beatmap_count_check_redstar = len(beatmap_count_check_redstar)
+	beatmapData_redstar = glob.db.fetchAll("SELECT beatmap_id FROM beatmaps WHERE beatmapset_id = %s", [beatmapData['beatmapset_id']])
+	beatmap_count_check_redstar = len(beatmapData_redstar)
 
 	if beatmap_count_check != beatmap_count_check_redstar:
 		if beatmap_count_check > beatmap_count_check_redstar and Force == False:
@@ -1840,16 +1837,19 @@ def editMap(fro, chan, message): # Using Atoka's editMap with Aoba's edit
 			return "Please enter a valid ranked status (ranked, approved, loved, qualified, unranked)."
 		
 		if beatmapData['ranked'] == rankTypeID:
-			if Force:
-				fokamessage(chan, f"[https://{server_domain}/u/{userID} {name}] | Skipped | This map is already {status}")
-			else:
-				return "This map is already {}".format(status)
+			if Force: fokamessage(chan, f"[https://{server_domain}/u/{userID} {name}] | Skipped | This map is already {status}")
+			else: return f"This map is already {status}"
 
 		if mapType == 'set':
-			numDiffs = glob.db.fetch("SELECT COUNT(id) FROM beatmaps WHERE beatmapset_id = {}".format(beatmapData["beatmapset_id"]))
-			glob.db.execute("UPDATE beatmaps SET ranked = {}, ranked_status_freezed = {}, rankedby = {} WHERE beatmapset_id = {} LIMIT {}".format(rankTypeID, freezeStatus, userID, beatmapData["beatmapset_id"], numDiffs["COUNT(id)"]))
+			numDiffs = glob.db.fetch("SELECT COUNT(id) as cnt FROM beatmaps WHERE beatmapset_id = %s", [beatmapData["beatmapset_id"]])
+			glob.db.execute("UPDATE beatmaps SET ranked = %s, ranked_status_freezed = %s, rankedby = %s WHERE beatmapset_id = %s LIMIT %s", [rankTypeID, freezeStatus, userID, beatmapData["beatmapset_id"], numDiffs["cnt"]])
 		else:
-			glob.db.execute("UPDATE beatmaps SET ranked = {}, ranked_status_freezed = {}, rankedby = {} WHERE beatmap_id = {} LIMIT 1".format(rankTypeID, freezeStatus, userID, mapID ))
+			glob.db.execute("UPDATE beatmaps SET ranked = %s, ranked_status_freezed = %s, rankedby = %s WHERE beatmap_id = %s LIMIT 1", [rankTypeID, freezeStatus, userID, mapID])
+
+		br = [i["beatmap_id"] for i in beatmapData_redstar]
+		for i in glob.db.fetchAll(f"SELECT id FROM rank_requests WHERE bid IN ({', '.join(['%s'] * len(br))}) AND blacklisted = 0 AND active = 1", br):
+			glob.db.execute("UPDATE rank_requests SET active = 0 WHERE id = %s", [i["id"]])
+			log.info(f"{i['id']} 리퀘 처리 완료")
 
 		# Announce / Log to admin panel logs when ranked status is changed
 		log.rap(userID, "has {} beatmap ({}): {} ({})".format(status, mapType, beatmapData["song_name"], mapID), True)
@@ -2296,159 +2296,64 @@ def mirror(fro, chan, message):
 			return "Please give me a beatmap first with /np command."
 
 		return mirrorMessage(token.tillerino[0])
-	
 
-def mods_list(message):
-	newMods = 0
-	freeMod = False
-	log.info("message[1:] = {}".format(message[1:]))
-	for _mod in message[1:]:
-		log.info("_mod = {}".format(_mod))
-		
-		if _mod.isdigit():
-			log.info("_mod {} 값이 숫자임을 감지".format(_mod))
-
-		if _mod.lower().strip() == "none" or _mod == "0" or _mod == "" or _mod == " ":
-			newMods = 0
-			break
-		elif _mod.lower().strip() == "nf" or _mod == "1":
-			newMods |= mods.NOFAIL
-		elif _mod.lower().strip() == "ez" or _mod == "2":
-			newMods |= mods.EASY
-		elif _mod.lower().strip() == "td" or _mod == "4":
-			newMods |= mods.TOUCHSCREEN
-		elif _mod.lower().strip() == "hd" or _mod == "8":
-			newMods |= mods.HIDDEN
-		elif _mod.lower().strip() == "hr" or _mod == "16":
-			newMods |= mods.HARDROCK
-		elif _mod.lower().strip() == "sd" or _mod == "32":
-			newMods |= mods.SUDDENDEATH
-		elif _mod.lower().strip() == "dt" or _mod == "64":
-			newMods |= mods.DOUBLETIME
-		elif _mod.lower().strip() == "rx" or _mod == "128":
-			newMods |= mods.RELAX
-		elif _mod.lower().strip() == "ht" or _mod == "256":
-			newMods |= mods.HALFTIME
-		elif _mod.lower().strip() == "nc" or _mod == "512" or _mod == "576":
-			#modsEnum += mods.NIGHTCORE
-			#modsEnum += 576
-			#newMods |= mods.NIGHTCORE
-			newMods |= 576
-		elif _mod.lower().strip() == "fl" or _mod == "1024":
-			newMods |= mods.FLASHLIGHT
-		elif _mod.lower().strip() == "at" or _mod == "2048":
-			newMods |= mods.AUTOPLAY
-		elif _mod.lower().strip() == "so" or _mod == "4096":
-			newMods |= mods.SPUNOUT
-		elif _mod.lower().strip() == "ap" or _mod == "8192":
-			newMods |= mods.RELAX2
-		elif _mod.lower().strip() == "pf" or _mod == "16384":
-			newMods |= mods.PERFECT
-		elif _mod.lower().strip() == "k4" or _mod == "32768":
-			newMods |= mods.KEY4
-		elif _mod.lower().strip() == "k5" or _mod == "65536":
-			newMods |= mods.KEY5
-		elif _mod.lower().strip() == "k6" or _mod == "131072":
-			newMods |= mods.KEY6
-		elif _mod.lower().strip() == "k7" or _mod == "262144":
-			newMods |= mods.KEY7
-		elif _mod.lower().strip() == "k8" or _mod == "524288":
-			newMods |= mods.KEY8
-		elif _mod.lower().strip() == "KEYMOD" or _mod == "1015808":
-			newMods |= mods.KEYMOD
-		elif _mod.lower().strip() == "fi" or _mod == "1048576":
-			newMods |= mods.FADEIN
-		elif _mod.lower().strip() == "rd" or _mod == "2097152":
-			newMods |= mods.RANDOM
-		elif _mod.lower().strip() == "LASTMOD" or _mod == "4194304":
-			newMods |= mods.LASTMOD
-		elif _mod.lower().strip() == "k9" or _mod == "16777216":
-			newMods |= mods.KEY9
-		elif _mod.lower().strip() == "k10" or _mod == "33554432":
-			newMods |= mods.KEY10
-		elif _mod.lower().strip() == "k1" or _mod == "67108864":
-			newMods |= mods.KEY1
-		elif _mod.lower().strip() == "k3" or _mod == "134217728":
-			newMods |= mods.KEY3
-		elif _mod.lower().strip() == "k2" or _mod == "268435456":
-			newMods |= mods.KEY2
-		elif _mod.lower().strip() == "v2" or _mod == "536870912":
-			newMods |= mods.SCOREV2
-		elif _mod.lower().strip() == "mr" or _mod == "1073741824":
-			newMods |= mods.MIRROR
-
-		if _mod.lower().strip() == "freemod" or _mod.lower().strip() == "free":
-			freeMod = True
-		if _mod.lower().strip() == "-" or _mod.lower().strip() == "-0":
-			freeMod = True
-
-	log.info("newMods = {}".format(newMods))
-	return newMods
 
 def ingame_rank_request(fro, chan, message):
 	# Get token and user ID
 	token = glob.tokens.getTokenFromUsername(fro)
-	if token is None:
-		return False
+	if not token: return False
 	userID = token.userID
+	bid = token.tillerino[0]
+	ranked_status = {0: "Unranked", 2: "Ranked", 3: "Approved", 4: "Qualified", 5: "Loved"}
 
 	# Make sure the user has triggered the bot with /np command
-	if token.tillerino[0] == 0:
-		return "Please give me a beatmap first with /np command."
+	if bid == 0: return "Please give me a beatmap first with /np command."
 
-	bid = token.tillerino[0]
+	if glob.db.fetch("SELECT u.id, u.username FROM rank_requests as r JOIN users as u ON r.userid = u.id WHERE r.bid = %s AND r.active = 1", [bid]):
+		return f"already [osu://b/{bid} this] map request by [https://{server_domain}/u/{userID} You!]"
+	try:
+		BeatmapSet = requests.get(f'https://osu.ppy.sh/api/get_beatmaps?k={bancho_api_key}&b={bid}', headers=requestHeaders).json()[0]["beatmapset_id"]
+		log.info(f'{BeatmapSet} 비트맵셋 DB에 저장중')
+		requests.get(f'https://old.{server_domain}/letsapi/v1/savedb?s={BeatmapSet}', headers=requestHeaders).json()
+		log.info(f'{BeatmapSet} 비트맵셋 DB에 저장완료')
+	except:
+		exceptionE("ERROR: 반초 요청 + Redstar DB등록 작업 실패")
+		return "ERROR: 반초 요청 + Redstar DB등록 작업 실패"
+	try:
+		bmapi = glob.db.fetch("SELECT b.ranked, b.rankedby, b.song_name, u.username FROM beatmaps as b LEFT JOIN users as u ON b.rankedby = u.id WHERE b.beatmap_id = %s", [bid])
+		if bmapi["ranked"] != 0:
+			rankedby_msg = f"[https://{server_domain}/u/{bmapi['rankedby']} {bmapi['username']}]" if bmapi["rankedby"] != "Bancho" else "Bancho"
+			return f"refuse [https://{server_domain}/u/{userID} {fro}] | [https://osu.{userDomainCheck()}/b/{bid} {bmapi['song_name']}] is {ranked_status[bmapi['ranked']]} by {rankedby_msg}"
+		elif bmapi["ranked"] == 0:
+			glob.db.execute("UPDATE beatmaps SET rankedby = 999, ranked = 4, ranked_status_freezed = 1 WHERE beatmapset_id = %s", [BeatmapSet])
+			glob.db.execute(f"INSERT INTO rank_requests (userid, bid, time, blacklisted, active) VALUES (%s, %s, %s, %s, %s)", [userID, bid, time.time(), 0, 1])
+			log.info(f"리퀘 비트맵셋 {BeatmapSet} 퀄파 변경")
+		elif bmapi["ranked"] == 5:
+			glob.db.execute("UPDATE beatmaps SET ranked_status_freezed = 1 WHERE beatmapset_id = %s", [BeatmapSet])
+			log.warning("럽드 확인함"); log.info("럽드 ranked_status_freezed 1로 변경")
+	except:
+		exceptionE("ERROR: 퀄파 변경록 작업 실패")
+		return "ERROR: 퀄파 변경록 작업 실패"
+	def swm():
+		try:
+			ingamemsg = f"[https://{server_domain}/u/999 Devlant] Qualified the map_set [https://osu.{server_domain}/s/{BeatmapSet} {bmapi['song_name']}]  [osu://b/{bid} osu!direct]"
+			fokamessage("#ranked", ingamemsg); log.chat("1차 인게임 공지 전송 완료")
+			ingamemsg = f"Requested [osu://b/{bid} Beatmap] By [https://{server_domain}/u/{userID} {fro}] ({userID})"
+			fokamessage("#ranked", ingamemsg); log.chat("2차 인게임 공지 전송 완료")
 
-	isranked = glob.db.fetch(f"SELECT ranked, song_name, beatmapset_id, ranked_status_freezed, rankedby FROM beatmaps WHERE beatmap_id = {bid}")
-	if isranked is None:
-		fokamessage(chan, f"{bid} 비트맵은 Redstar DB에 존재하지 않습니다. 또는 Bancho에서 삭제된 맵일 가능성이 높습니다.")
-		fokamessage(chan, f"{bid} beatmap does not exist in Redstar DB. or Most likely a map that has been removed from Bancho.")
-		return
-
-	#userID = userUtils.getID(fro)
-	rqcheck = glob.db.fetch(f"SELECT * FROM rank_requests WHERE bid = {bid}")
-	if isranked["ranked"] == 0 and isranked["ranked_status_freezed"] == 0:
-		if rqcheck is None:
-			log.info("pep | 리퀘 요청 중")
-			glob.db.execute(f"INSERT INTO rank_requests (id, userid, bid, type, time, blacklisted) VALUES ('NULL', {userID}, {bid}, 'b', {time.time()}, 0)")
-		else:
-			log.warning("pep | 리퀘가 존재함")
-			return "request exists"
-		
-		time.sleep(1)
-
-		log.info("pep | 어드민 패널 퀄파셋 요청")
-		r = requests.get(f'https://admin.{server_domain}/frontend/rank_request/set_qualified/b/{bid}')
-		r = r.text
-		
-		#데이터 처리량 많을때 리턴 인게임에서 rebuse 뜸
-		fokamessage(chan, r)
-
-		return f"[https://{server_domain}/u/{userID} {fro}] | [https://osu.{userDomainCheck()}/s/{isranked['beatmapset_id']} {isranked['song_name']}] Changed Qualified!"
-	else:
-		if isranked["ranked"] is 0:
-			ranked_status_txt = "unranked"
-		elif isranked["ranked"] is 2:
-			ranked_status_txt = "ranked"
-		elif isranked["ranked"] is 5:
-			ranked_status_txt = "loved"
-		elif isranked["ranked"] is 3:
-			ranked_status_txt = "approved"
-		elif isranked["ranked"] is 4:
-			ranked_status_txt = "qualified"
-		else:
-			ranked_status_txt = "Ranked status not found"
-
-		if rqcheck is None and isranked["ranked"] is 4:
-			log.info("pep | 리퀘 재요청 중 ({}된 맵)".format(ranked_status_txt))
-			glob.db.execute(f"INSERT INTO rank_requests (id, userid, bid, type, time, blacklisted) VALUES ('NULL', {userID}, {bid}, 'b', {time.time()}, 0)")
-			fokamessage(chan, f"[https://osu.{userDomainCheck()}/b/{bid} {bid}] 비트맵은 {ranked_status_txt}상태이고 리퀘만 누락되어 리퀘 재요청함")
-		
-		log.warning("{} 해당 비트맵 상태 = {}".format(bid, ranked_status_txt))
-		
-		rankedby_msg = f"[https://{server_domain}/u/{isranked['rankedby']} {userUtils.getUsername(isranked['rankedby'])}]"  if isranked["rankedby"] != "Bancho" else "Bancho"
-		
-
-		return f"refuse [https://{server_domain}/u/{userID} {fro}] | [https://osu.{userDomainCheck()}/b/{bid} {isranked['song_name']}] is {ranked_status_txt} by {rankedby_msg}"
+			webhook = DiscordWebhook(url=glob.conf.config["discord"]["rankreq"])
+			embed = DiscordEmbed(description=f"Status Changed by Devlant. <@&904084069413965944>\nRequested by {fro} ({userID})", color=242424) #this is giving me discord.py vibes
+			embed.set_author(name=f"{bmapi['song_name']} was just Qualified. (Beatmap_Set)", url=f"https://admin.{server_domain}/rank/{bid}", icon_url=f"https://a.{server_domain}/999") #will rank to random diff but yea
+			embed.set_footer(text="via pep.py!")
+			embed.set_image(url=f"https://b.{server_domain}/bg/{bid}")
+			webhook.add_embed(embed)
+			print(" * Posting webhook!")
+			webhook.execute()
+		except:
+			exceptionE("ERROR: 디코 웹훅 + 인게임 알림 작업 실패")
+			return "ERROR: 디코 웹훅 + 인게임 알림 작업 실패"
+	threading.Thread(target=swm).start()
+	return f"[https://{server_domain}/u/{userID} {fro}] | [https://osu.{userDomainCheck()}/s/{BeatmapSet} {bmapi['song_name']}] Changed Qualified!"
 
 def song_info(fro, chan, message):
 	# Get token and user ID
@@ -2481,8 +2386,7 @@ def song_info(fro, chan, message):
 		else:
 			#rankedby_msg = f"(Ranked by [https://osu.ppy.sh/b/{songinfo['beatmap_id']}] Bancho)"
 			rankedby_msg = f"(Ranked by Bancho)"
-		
-		#newMods = mods_list(message)
+
 		newMods = tillerinoMods(fro, chan, message if message != [] else ["no"], modsNumType="!songinfo")
 
 		log.info("pp_songinfo 조회중...")
