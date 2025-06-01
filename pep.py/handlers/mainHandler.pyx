@@ -245,6 +245,7 @@ class handler(requestsManager.asyncRequestHandler):
 	@tornado.web.asynchronous
 	@tornado.gen.engine
 	def asyncGet(self):
+		self.set_header("Content-Type", "text/html")
 		glob.self = self
 
 		html = 	"<html><head><title>Aoba's a cutie?</title>"
