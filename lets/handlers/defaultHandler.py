@@ -8,6 +8,7 @@ class handler(requestsManager.asyncRequestHandler):
 	@tornado.web.asynchronous
 	@tornado.gen.engine
 	def asyncGet(self):
+		self.set_header("Content-Type", "text/html")
 		print("404: {}".format(self.request.uri))
 		self.write("""
 				<html>
