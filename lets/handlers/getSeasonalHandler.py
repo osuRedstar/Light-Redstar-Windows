@@ -11,6 +11,9 @@ from objects import glob
 
 
 class handler(requestsManager.asyncRequestHandler):
+	"""
+	Handler for /web/osu-getseasonal.php
+	"""
 	@tornado.web.asynchronous
 	@tornado.gen.engine
 	def asyncGet(self):
