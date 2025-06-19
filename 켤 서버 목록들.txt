@@ -17,12 +17,13 @@
 ??. lazer?
 ??. plca?
 
-15. filebrowser
-16. Realistik API
-17. hanayo
-18. osu-discord-webhook
-19. 초보의 봇
-20. discord.aodd.moe
+15. Ubuntu-24.04 터미널 띄워두기 (wireguard)
+16. filebrowser
+17. Realistik API
+18. hanayo
+19. osu-discord-webhook
+20. 초보의 봇
+21. discord.aodd.moe
 
 (다른 windows 계정)
 1. hosting - 급식서버, 급식서버 디코봇 켜기, 음악봇 - 하토루, youtube11.com
