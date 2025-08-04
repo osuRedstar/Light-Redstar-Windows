@@ -27,5 +27,5 @@
 22. mistserver
 
 (다른 windows 계정)
-1. hosting - 급식서버, 급식서버 디코봇 켜기, 음악봇 - 하토루, youtube11.com
+1. hosting - 급식서버, 급식서버 디코봇 켜기, 음악봇 - 하토루, youtube11.com, 인라마크서버
 2. youhoa - 디코봇, 마크서버
