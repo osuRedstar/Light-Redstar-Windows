@@ -2316,9 +2316,7 @@ def ingame_rank_request(fro, chan, message):
 		log.info(f'{BeatmapSet} 비트맵셋 DB에 저장중')
 		requests.get(f'https://old.{server_domain}/letsapi/v1/savedb?s={BeatmapSet}', headers=requestHeaders).json()
 		log.info(f'{BeatmapSet} 비트맵셋 DB에 저장완료')
-	except:
-		exceptionE("ERROR: 반초 요청 + Redstar DB등록 작업 실패")
-		return "ERROR: 반초 요청 + Redstar DB등록 작업 실패"
+	except: return exceptionE("ERROR: 반초 요청 + Redstar DB등록 작업 실패")
 	try:
 		bmapi = glob.db.fetch("SELECT b.ranked, b.rankedby, b.song_name, u.username FROM beatmaps as b LEFT JOIN users as u ON b.rankedby = u.id WHERE b.beatmap_id = %s", [bid])
 		if bmapi["ranked"] != 0:
@@ -2331,9 +2329,7 @@ def ingame_rank_request(fro, chan, message):
 		elif bmapi["ranked"] == 5:
 			glob.db.execute("UPDATE beatmaps SET ranked_status_freezed = 1 WHERE beatmapset_id = %s", [BeatmapSet])
 			log.warning("럽드 확인함"); log.info("럽드 ranked_status_freezed 1로 변경")
-	except:
-		exceptionE("ERROR: 퀄파 변경록 작업 실패")
-		return "ERROR: 퀄파 변경록 작업 실패"
+	except: return exceptionE("ERROR: 퀄파 변경록 작업 실패")
 	def swm():
 		try:
 			ingamemsg = f"[https://{server_domain}/u/999 Devlant] Qualified the map_set [https://osu.{server_domain}/s/{BeatmapSet} {bmapi['song_name']}]  [osu://b/{bid} osu!direct]"
@@ -2349,11 +2345,16 @@ def ingame_rank_request(fro, chan, message):
 			webhook.add_embed(embed)
 			print(" * Posting webhook!")
 			webhook.execute()
-		except:
-			exceptionE("ERROR: 디코 웹훅 + 인게임 알림 작업 실패")
-			return "ERROR: 디코 웹훅 + 인게임 알림 작업 실패"
+		except: return exceptionE("ERROR: 디코 웹훅 + 인게임 알림 작업 실패")
 	threading.Thread(target=swm).start()
 	return f"[https://{server_domain}/u/{userID} {fro}] | [https://osu.{userDomainCheck()}/s/{BeatmapSet} {bmapi['song_name']}] Changed Qualified!"
+
+def ingame_rank_requests(fro, chan, message):
+	rqs = glob.db.fetchAll("SELECT rr.userid, u.username, rr.bid, b.song_name, FROM_UNIXTIME(rr.time) AS timez FROM rank_requests AS rr LEFT JOIN beatmaps as b ON rr.bid = b.beatmap_id LEFT JOIN users AS u ON rr.userid = u.id WHERE active = 1")
+	if not rqs: return "The queue is clean! (0 map requests)"
+	for i in rqs:
+		i["userid"]
+		fokamessage(chan, f"[https://{server_domain}/u/{i['userid']} {i['username']}] requests [https://osu.{server_domain}/b/{i['bid']} {i['song_name']}] on {i['timez']}")
 
 def song_info(fro, chan, message):
 	# Get token and user ID
@@ -3371,6 +3372,10 @@ commands = [
 		"trigger": "!rankrq",
 		#"syntax": "<Beatmap_id>",
 		"callback": ingame_rank_request
+	}, {
+		"trigger": "!rankrqs",
+		"privileges": privileges.ADMIN_MANAGE_BEATMAPS,
+		"callback": ingame_rank_requests
 	}, {
 		"trigger": "!songinfo",
 		#"syntax": "<Beatmap_id>",
