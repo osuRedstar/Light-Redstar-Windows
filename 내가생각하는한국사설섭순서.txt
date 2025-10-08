@@ -1,0 +1,5 @@
+1. Debian
+2. Redstar
+2.5?. jakadsmania? (사라짐, 251008 도메인 내가 먹음)
+3. Inlayo
+4. osuspeed.run (구 Debian)
