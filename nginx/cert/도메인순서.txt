@@ -1,17 +1,18 @@
-redstar.moe (211012)
-*.aodd.moe (210630)
-*.aodd.xyz (210713)
+*.redstar.moe (211012) namecheap.com
+*.aodd.moe (210630) namecheap.com
+*.aodd.xyz (210713) namecheap.com
 *.vpn.aodd.xyz (혼자만)
-*.hanrang.xyz (210829) ~ (250829)
-*.nerinyan.pw (220419)
-*.xi-overthe.top (230930)
-*.wolpi.kr (231103)
-*.all-adm.in (240113)
-*.i-need-to.click (240624)
-*.mokdong.sbs (241102)
-*.kizuna.music (241123)
-*.pydns.kr (250108)
-*.hatoru.kr (250123)
-*.dongseo.vip (250311)
-*.youtube11.com (250414)
-*.youtube11.info (250414) ~ (260414)
+*.nerinyan.pw (220419) namecheap.com
+*.xi-overthe.top (230930) namecheap.com
+*.wolpi.kr (231103) hosting.kr
+*.all-adm.in (240113) namecheap.com
+*.i-need-to.click (240624) namecheap.com
+*.mokdong.sbs (241102) dynadot.com
+*.kizuna.music (241123) register.music --Transfer (251007)--> dynadot.com
+*.pydns.kr (250823) hosting.kr
+*.hatoru.kr (250123) hosting.kr
+*.dongseo.vip (250311) dynadot.com
+*.youtube11.com (250414) dynadot.com
+*.youtube11.info (250414) ~ (260414) dynadot.com
+*.jakadsmania.com (251008) dynadot.com
+*.jakadsmania.info (251008) ~ (261008) dynadot.com
