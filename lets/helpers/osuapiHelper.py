@@ -59,7 +59,7 @@ def osuApiRequest(request, params, getFirst=True, checkpp=False):
 			data = json.loads(requests.get(finalURL2, timeout=5).text)
 			if data is None: data = []
 
-		if getFirst: resp = data[0] if len(data) >= 1 else resp = None
+		if getFirst: resp = data[0] if len(data) >= 1 else None
 		else: resp = data
 	finally:
 		glob.dog.increment(glob.DATADOG_PREFIX+".osu_api.requests")
