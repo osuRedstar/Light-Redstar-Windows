@@ -11,8 +11,11 @@ from constants import exceptions
 
 from helpers import config
 conf = config.config("config.ini")
+localosuapiurl = conf.config["server"]["osuapiurl"]
 server_domain = conf.config["server"]["server-domain"]
 beatmapspath = conf.config["server"]["beatmapspath"]
+
+requestHeaders = {"User-Agent": f"RedstarOSU's lets.py (python request) | https://old.{server_domain}"}
 
 #def osuApiRequest(request, params, getFirst=True):
 def osuApiRequest(request, params, getFirst=True, checkpp=False):
@@ -45,26 +48,19 @@ def osuApiRequest(request, params, getFirst=True, checkpp=False):
 		#if (checkpp and len(data) <= 0) or data == []:
 		if (checkpp and len(data) <= 0):
 			log.error("osuapiHelper.py | lets pp oppai? 조회중 반초 요청 실패, Redstar에서 검색")
-			finalURL2 = "https://{}/api/v1/{}?{}".format(server_domain, request, params)
+			finalURL2 = f"{localosuapiurl}/api/v1/{request}?{params}"
 			log.info(finalURL2)
 			data = json.loads(requests.get(finalURL2, timeout=5).text)
-			if data is None:
-				data = []
+			if data is None: data = []
 
 		if data == []:
-			finalURL2 = "https://{}/api/v1/{}?{}".format(server_domain, request, params)
+			finalURL2 = f"{localosuapiurl}/api/v1/{request}?{params}"
 			log.info(finalURL2)
 			data = json.loads(requests.get(finalURL2, timeout=5).text)
-			if data is None:
-				data = []
+			if data is None: data = []
 
-		if getFirst:
-			if len(data) >= 1:
-				resp = data[0]
-			else:
-				resp = None
-		else:
-			resp = data
+		if getFirst: resp = data[0] if len(data) >= 1 else resp = None
+		else: resp = data
 	finally:
 		glob.dog.increment(glob.DATADOG_PREFIX+".osu_api.requests")
 		log.debug(str(resp).encode("utf-8"))
@@ -84,7 +80,6 @@ def getOsuFileFromName(fileName):
 		return None
 
 	response = None
-	requestHeaders = {"User-Agent": f"RedstarOSU's lets.py (python request) | https://old.{server_domain}"}
 	try:
 		URL = "https://b.{}/web/maps/{}".format(server_domain, quote(fileName))
 		log.info(f"lets/helpers/osuapiHelper.py/ getOsuFileFromName(fileName) | URL = {URL}")
@@ -122,7 +117,6 @@ def getOsuFileFromID(beatmapID):
 		return None
 
 	response = None
-	requestHeaders = {"User-Agent": f"RedstarOSU's lets.py (python request) | https://old.{server_domain}"}
 	try:
 		URL = "{}/osu/{}".format(glob.conf.config["osuapi"]["apiurl"], beatmapID)
 		log.info(f"lets/helpers/osuapiHelper.py/ getOsuFileFromID(beatmapID) | URL = {URL}")
