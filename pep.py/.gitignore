@@ -7,4 +7,7 @@ config.ini
 redistest.py
 *.c
 *.so
+pep.py/common/db/*.html
+pep.py/handlers/*.html
+pep.py/helpers/*.html
 .pyenv

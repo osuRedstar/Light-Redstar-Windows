@@ -1,5 +1,7 @@
 import time
 import datetime
+import threading
+import re
 
 from common.log import logUtils as log
 from constants import rankedStatuses
@@ -98,10 +100,8 @@ class beatmap:
 		"""
 		
 		#추가
-		if (frozen != 1) and (self.rankedStatus == 2 or self.rankedStatus == 3 or self.rankedStatus == 5):
-			frozen = 2
-		else:
-			frozen = 0
+		if (frozen != 1) and (self.rankedStatus == 2 or self.rankedStatus == 3 or self.rankedStatus == 5): frozen = 2
+		else: frozen = 0
 
 		params = [
 			self.beatmapID,
@@ -223,6 +223,63 @@ class beatmap:
 		#self.HP = float(data["hp"])
 		self.mode = int(data["mode"])
 
+	def time_log(func):
+		def wrapper(*args, **kwargs):
+			st = time.time()
+			result = func(*args, **kwargs)
+			log.chat(f"{func} | {time.time() - st} Sec")
+			return result
+		return wrapper
+	@time_log
+	def testdebug(self, md5, beatmapSetID):
+		mainData = dataStd = dataTaiko = dataCtb = dataMania = None
+		#songnames = [i["version"] for i in osuapiHelper.osuApiRequest("get_beatmaps", f"s={beatmapSetID}", getFirst=False)]
+		try:
+			pattern = r'^(?P<artist>.+) - (?P<title>.+) \((?P<creator>.+)\) \[(?P<version>.+)\]\.osu$'
+			match = re.match(pattern, self.fileName)
+			artist = match.group('artist')
+			title = match.group('title')
+			creator = match.group('creator')
+			version = match.group('version')
+		except: artist = title = creator = version = None
+		isBeatmapExist = False and bool(version and version in songnames)
+		isBeatmapSame = False
+
+		def get_main_data():
+			res = [None] * 9
+			mainData = dataStd = dataTaiko = dataCtb = dataMania = None
+			nonlocal isBeatmapExist, isBeatmapSame
+			threads = []
+			def osuApiRequest(q, m, gF): res[m] = osuapiHelper.osuApiRequest("get_beatmaps", q, gF)
+			for m in range(9):
+				q = f"h={md5}&a=1&m={m}" if m < 4 else f"s={beatmapSetID}&a=1&m={m - 4}"
+				if m == 8:
+					q = f"s={beatmapSetID}"; gF = False
+				else: gF = True
+				t = threading.Thread(target=osuApiRequest, args=[q, m, gF]); t.start(); threads.append(t)
+			for t in threads: t.join() #모든 쓰레드가 끝날 때까지 대기
+			for i, d in enumerate(res):
+				isBeatmapSame = True if i == 4 and mainData else False
+				if i == 8:
+					isBeatmapExist = bool(version and version in [i["version"] for i in d])
+					continue
+				if d and not mainData: mainData = d
+				if d and not dataStd and i in [0, 4]: dataStd = d
+				elif d and not dataTaiko and i in [1, 5]: dataTaiko = d
+				elif d and not dataCtb and i in [2, 6]: dataCtb = d
+				elif d and not dataMania and i in [3, 7]: dataMania = d
+			return mainData, dataStd, dataTaiko, dataCtb, dataMania
+		mainData, dataStd, dataTaiko, dataCtb, dataMania = get_main_data()
+
+		if mainData and self.rankedStatusFrozen == 1 and self.beatmapSetID > 100000000: return True
+
+		if not mainData:
+			if isBeatmapExist:
+				# We have some data, but md5 doesn't match. Beatmap is outdated
+				self.rankedStatus = rankedStatuses.NEED_UPDATE
+				return True
+			return False # Still no data, beatmap is not submitted
+	@time_log
 	def setDataFromOsuApi(self, md5, beatmapSetID):
 		"""
 		Set this object's beatmap data from osu!api.
@@ -246,12 +303,27 @@ class beatmap:
 		elif dataMania is not None:
 			mainData = dataMania
 
+		""" res = [None] * 8
+		log.debug2(f"res = {res}")
+		#res = {0: None, 1: None, 2: None, 3: None}
+		def get_main_data():
+			threads = []
+			def osuApiRequest(q, m): res[m] = osuapiHelper.osuApiRequest("get_beatmaps", q)
+			for m in range(8):
+				q = f"h={md5}&a=1&m={m}" if m < 4 else f"s={beatmapSetID}&a=1&m={m - 4}"
+				t = threading.Thread(target=osuApiRequest, args=[q, m]); t.start(); threads.append(t)
+			for t in threads: t.join() #모든 쓰레드가 끝날 때까지 대기
+			for d in res: #응답을 순서대로 확인
+				if d: return d
+		mainData2 = get_main_data()
+		log.debug2(mainData2)
+		for i in res: log.warning(f"i = {i}") """
+
 		# If the beatmap is frozen and still valid from osu!api, return True so we don't overwrite anything
-		if mainData is not None and self.rankedStatusFrozen == 1 and self.beatmapSetID > 100000000:
-			return True
+		if mainData and self.rankedStatusFrozen == 1 and self.beatmapSetID > 100000000: return True
 
 		# Can't fint beatmap by MD5. The beatmap has been updated. Check with beatmap set ID
-		if mainData is None:
+		if not mainData:
 			log.debug("osu!api data is None")
 			dataStd = osuapiHelper.osuApiRequest("get_beatmaps", "s={}&a=1&m=0".format(beatmapSetID))
 			dataTaiko = osuapiHelper.osuApiRequest("get_beatmaps", "s={}&a=1&m=1".format(beatmapSetID))
@@ -266,11 +338,10 @@ class beatmap:
 			elif dataMania is not None:
 				mainData = dataMania
 
-			if mainData is None:
-				# Still no data, beatmap is not submitted
-				return False
+			if not mainData: return False # Still no data, beatmap is not submitted
 			else:
 				# We have some data, but md5 doesn't match. Beatmap is outdated
+				#TODO 전체 data 가져와서? sonName 비교 후 업데이트 또는  notSubmit 구분하기
 				self.rankedStatus = rankedStatuses.NEED_UPDATE
 				return True
 
@@ -278,9 +349,7 @@ class beatmap:
 		# We have data from osu!api, set beatmap data
 		log.debug("Got beatmap data from osu!api")
 		self.songName = "{} - {} [{}]".format(mainData["artist"], mainData["title"], mainData["version"])
-		self.fileName = "{} - {} ({}) [{}].osu".format(
-			mainData["artist"], mainData["title"], mainData["creator"], mainData["version"]
-		).replace("\\", "")
+		self.fileName = "{} - {} ({}) [{}].osu".format(mainData["artist"], mainData["title"], mainData["creator"], mainData["version"]).replace("\\", "")
 		self.fileMD5 = md5
 		self.rankedStatus = convertRankedStatus(int(mainData["approved"]))
 		self.rankingDate = int(time.mktime(datetime.datetime.strptime(mainData["last_update"], "%Y-%m-%d %H:%M:%S").timetuple()))
@@ -288,35 +357,21 @@ class beatmap:
 		self.beatmapSetID = int(mainData["beatmapset_id"])
 		self.AR = float(mainData["diff_approach"])
 		self.OD = float(mainData["diff_overall"])
-		self.artist = "{}".format(mainData["artist"])
-		self.creator = "{}".format(mainData["creator"])
-		self.title = "{}".format(mainData["title"])
-		self.version = "{}".format(mainData["version"])
-		# Determine stars for every mode
-		self.starsStd = 0.0
-		self.starsTaiko = 0.0
-		self.starsCtb = 0.0
-		self.starsMania = 0.0
+		self.artist = str(mainData["artist"])
+		self.creator = str(mainData["creator"])
+		self.title = str(mainData["title"])
+		self.version = str(mainData["version"])
+		# Determine stars for every mode		
+		self.starsStd = float(dataStd.get("difficultyrating", 0)) if dataStd else 0.0
+		self.starsTaiko = float(dataTaiko.get("difficultyrating", 0)) if dataTaiko else 0.0
+		self.starsCtb = float(next((x for x in (dataCtb.get("difficultyrating"), dataCtb.get("diff_aim")) if x), 0)) if dataCtb else 0.0
+		self.starsMania = float(dataMania.get("difficultyrating", 0)) if dataMania else 0.0
 		self.mode = int(mainData["mode"])
-		if dataStd is not None:
-			self.starsStd = float(dataStd.get("difficultyrating", 0))
-		if dataTaiko is not None:
-			self.starsTaiko = float(dataTaiko.get("difficultyrating", 0))
-		if dataCtb is not None:
-			self.starsCtb = float(
-				next((x for x in (dataCtb.get("difficultyrating"), dataCtb.get("diff_aim")) if x is not None), 0)
-			)
-		if dataMania is not None:
-			self.starsMania = float(dataMania.get("difficultyrating", 0))
-
 		self.CS = float(mainData["diff_size"])
 		self.HP = float(mainData["diff_drain"])
-		self.maxCombo = int(mainData["max_combo"]) if mainData["max_combo"] is not None else 0
+		self.maxCombo = int(mainData["max_combo"]) if mainData["max_combo"] else 0
 		self.hitLength = int(mainData["hit_length"])
-		if mainData["bpm"] is not None:
-			self.bpm = int(float(mainData["bpm"]))
-		else:
-			self.bpm = -1
+		self.bpm = int(float(mainData["bpm"])) if mainData["bpm"] else -1
 		return True
 
 	def setData(self, md5, beatmapSetID):

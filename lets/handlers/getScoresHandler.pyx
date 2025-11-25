@@ -122,9 +122,11 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Data to return
 			data = ""
-			data += bmap.getData(sboard.totalScores, scoreboardVersion)
-			data += sboard.getScoresData()
+			data += bmap.getData(sboard.totalScores, scoreboardVersion) ;log.warning(data)
+			data += sboard.getScoresData() ;log.debug2(data)
 			self.write(data)
+			btbt = bmap.testdebug(md5, beatmapSetID) #beatmap.beatmap(md5, beatmapSetID, gameMode, fileName=fileName)
+			log.info(f"btbt = {btbt}")
 
 			# Datadog stats
 			glob.dog.increment(glob.DATADOG_PREFIX+".served_leaderboards")

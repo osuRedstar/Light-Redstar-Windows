@@ -10,3 +10,7 @@ common_refractor
 *.c
 *.so
 *.log
+common/db/*.html
+handlers/*.html
+objects/*.html
+pp/catch_the_pp/**/*.html
