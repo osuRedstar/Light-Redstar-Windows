@@ -1,11 +1,13 @@
 import datetime
 import gzip
+import os
 import sys
 import traceback
 
 import tornado.gen
 import tornado.web
 from raven.contrib.tornado import SentryMixin
+from ansi2html import Ansi2HTMLConverter
 
 from common.log import logUtils as log
 from common.web import requestsManager
@@ -252,8 +254,21 @@ class handler(requestsManager.asyncRequestHandler):
 		#html += "<iframe src='https://ghostbin.co/paste/bwe8z' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
 		#Yes. I just wrote the credit... in it.
 
+		neofetch = os.popen('powershell -Command "winfetch"').read() if os.name == "nt" else os.popen('neofetch').read()
+		if os.name == "nt": neofetch += os.popen('wsl neofetch').read()
+		sequences_to_remove = [
+			'\x1b[?25l', #커서 숨기기
+			'\x1b[?25h', #커서 보이기
+			'\x1b[?7l',  #터미널 래핑 off
+			'\x1b[?7h'   #터미널 래핑 on
+		]
+		for s in sequences_to_remove: neofetch = neofetch.replace(s, "")
+		neofetch = Ansi2HTMLConverter(inline=True).convert(neofetch, full=False)
+
 		html += '''
-		<pre>
+		<meta charset="UTF-8">
+        <body style="background: #111; color: #fff">
+        <pre style="font-family: 'Cascadia Mono', 'Consolas', 'Courier New', monospace; font-size: 12px;">
                     ______                   __
   ____  _______  __/ / __ )____ _____  _____/ /_  ____
  / __ \/ ___/ / / / / __  / __ `/ __ \/ ___/ __ \/ __ \\
@@ -265,7 +280,7 @@ osu!bancho
                  o . o o.o
                       ...oo
                         __[]__
-                     __|_o_o_o\__
+                     __|_c_h_o\__
                      \\""""""""""/
                       \. ..  . /
                  ^^^^^^^^^^^^^^^^^^^^
@@ -273,6 +288,20 @@ osu!bancho
 web:    <a target="_blank", href="https://redstar.moe">https://redstar.moe</a>
 status: <a target="_blank", href="http://status.redstar.moe">http://status.redstar.moe</a>
 github: <a target="_blank", href="http://github.com/osuRedstar">http://github.com/osuRedstar</a>
+
+<marquee style="font-family: monospace; white-space: pre-wrap; width: 30%;">
+                  .. o  .
+                 o.o o . o
+                oo...
+            __[]__
+        _\:D/_/c_h_o_|__     u wot m8
+     \\""""""""""""""/
+      \ . ..  .. . /
+</marquee>
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+{neofetch}
 </pre>
-		'''
+</body>
+		'''.format(neofetch=neofetch)
 		self.write(html)
