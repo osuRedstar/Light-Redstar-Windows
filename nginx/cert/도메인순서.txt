@@ -16,3 +16,5 @@
 *.youtube11.info (250414) ~ (260414) dynadot.com
 *.jakadsmania.com (251008) dynadot.com
 *.jakadsmania.info (251008) ~ (261008) dynadot.com
+*.nanokvm.ch (251209) dynadot.com
+*.youtu11.be (251209) dynadot.com
