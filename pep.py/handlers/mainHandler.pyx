@@ -7,7 +7,6 @@ import traceback
 import tornado.gen
 import tornado.web
 from raven.contrib.tornado import SentryMixin
-from ansi2html import Ansi2HTMLConverter
 
 from common.log import logUtils as log
 from common.web import requestsManager
@@ -254,16 +253,9 @@ class handler(requestsManager.asyncRequestHandler):
 		#html += "<iframe src='https://ghostbin.co/paste/bwe8z' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
 		#Yes. I just wrote the credit... in it.
 
-		neofetch = os.popen('powershell -Command "winfetch"').read() if os.name == "nt" else os.popen('neofetch').read()
-		if os.name == "nt": neofetch += os.popen('wsl neofetch').read()
-		sequences_to_remove = [
-			'\x1b[?25l', #커서 숨기기
-			'\x1b[?25h', #커서 보이기
-			'\x1b[?7l',  #터미널 래핑 off
-			'\x1b[?7h'   #터미널 래핑 on
-		]
-		for s in sequences_to_remove: neofetch = neofetch.replace(s, "")
-		neofetch = Ansi2HTMLConverter(inline=True).convert(neofetch, full=False)
+		#Windows need WSL & winfetch + aha.exe | Linux need neofetch + aha
+		neofetch = os.popen('powershell -Command "(winfetch | aha -n); (wsl neofetch | aha -n)"') if os.name == "nt" else os.popen('neofetch | aha -n')
+		neofetch = neofetch.buffer.read().decode('utf-8', errors='ignore')
 
 		html += '''
 		<meta charset="UTF-8">
