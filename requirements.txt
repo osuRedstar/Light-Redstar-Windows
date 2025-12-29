@@ -7,6 +7,7 @@ datadog==0.14.0
 dill==0.2.7.1
 discord==1.7.3
 discord-webhook==0.8.0
+dotenv===0.9.9
 flask==1.1.1
 flask-recaptcha==0.4.2
 geoip2==4.6.0
