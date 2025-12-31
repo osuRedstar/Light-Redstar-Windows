@@ -5,7 +5,7 @@
 *.nerinyan.pw (220419) namecheap.com
 *.xi-overthe.top (230930) namecheap.com
 *.wolpi.kr (231103) hosting.kr
-*.all-adm.in (240113) namecheap.com
+*.all-adm.in (240113) namecheap.com --Transfer (251228)--> dynadot.com
 *.i-need-to.click (240624) namecheap.com
 *.mokdong.sbs (241102) dynadot.com
 *.kizuna.music (241123) register.music --Transfer (251007)--> dynadot.com
