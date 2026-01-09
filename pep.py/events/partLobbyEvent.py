@@ -1,7 +1,7 @@
 from common.log import logUtils as log
 from helpers import chatHelper as chat
 
-def handle(userToken, _):
+def handle(tornadoRequest, userToken, _):
 	# Get usertoken data
 	username = userToken.username
 

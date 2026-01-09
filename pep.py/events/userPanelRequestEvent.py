@@ -3,7 +3,7 @@ from constants import clientPackets
 from constants import serverPackets
 
 
-def handle(userToken, packetData):
+def handle(tornadoRequest, userToken, packetData):
 	# Read userIDs list
 	packetData = clientPackets.userPanelRequest(packetData)
 

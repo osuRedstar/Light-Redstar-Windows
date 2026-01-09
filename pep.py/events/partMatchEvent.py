@@ -1,2 +1,2 @@
-def handle(userToken, _=None):
+def handle(tornadoRequest, userToken, _=None):
 	userToken.leaveMatch()

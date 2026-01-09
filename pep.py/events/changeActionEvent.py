@@ -1,10 +1,12 @@
+import time
+
 from common.log import logUtils as log
 from constants import clientPackets
 from constants import serverPackets
 from objects import glob
 from common.constants import mods
 
-def handle(userToken, packetData):
+def handle(tornadoRequest, userToken, packetData):
 	# Get usertoken data
 	userID = userToken.userID
 	username = userToken.username
@@ -46,7 +48,7 @@ if userToken.matchID != -1 and userToken.actionID != actions.MULTIPLAYING and us
 	userToken.actionMods = packetData["actionMods"]
 	userToken.beatmapID = packetData["beatmapID"]
 
-	if bool(packetData["actionMods"] & 128) == True:
+	if bool(packetData["actionMods"] & mods.RELAX) == True:
 		userToken.relaxing = True
 		userToken.autopiloting = False
 		#if userToken.actionID in (0, 1, 14):
@@ -62,7 +64,7 @@ if userToken.matchID != -1 and userToken.actionID != actions.MULTIPLAYING and us
 			userToken.autopilotAnnounce = False
 			userToken.enqueue(serverPackets.notification("You're playing with Relax, we've changed the leaderboard to Relax."))
 	#AP 모드 추가
-	elif bool(packetData["actionMods"] & 8192) == True:
+	elif bool(packetData["actionMods"] & mods.RELAX2) == True:
 		userToken.relaxing = False
 		userToken.autopiloting = True
 		if userToken.actionID in (0, 14):
@@ -82,8 +84,8 @@ if userToken.matchID != -1 and userToken.actionID != actions.MULTIPLAYING and us
 		status_rx = status["current_status"].endswith("on Relax")
 		status_ap = status["current_status"].endswith("on AP")
 		
-		log.info("status_rx = {}".format(status_rx))
-		log.info("status_ap = {}".format(status_ap))
+		log.info(f"status_rx = {status_rx}")
+		log.info(f"status_ap = {status_ap}")
 
 		if status_rx:
 			UserText = packetData["actionText"] + "AFK on Relax"
@@ -109,6 +111,7 @@ if userToken.matchID != -1 and userToken.actionID != actions.MULTIPLAYING and us
 			userToken.enqueue(serverPackets.notification("You've disabled autopilot. We've changed back to the Regular leaderboard."))
 
 	glob.db.execute("UPDATE users_stats SET current_status = %s WHERE id = %s", [UserText, userID])
+	glob.db.execute("UPDATE users SET latest_activity = %s WHERE id = %s", [int(time.time()), userID])
 	# Enqueue our new user panel and stats to us and our spectators
 	recipients = [userToken]
 	if len(userToken.spectators) > 0:
@@ -124,6 +127,5 @@ if userToken.matchID != -1 and userToken.actionID != actions.MULTIPLAYING and us
 			i.enqueue(serverPackets.userStats(userID, force))
 
 	# Console output
-	from common.web import requestsManager
-	ip = requestsManager.asyncRequestHandler.getRequestIP(glob.self)
+	ip = tornadoRequest.getRequestIP()
 	log.info("{} | {} changed action: {} [{}][{}][{}]".format(ip, username, str(userToken.actionID), userToken.actionText, userToken.actionMd5, userToken.beatmapID))

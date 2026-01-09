@@ -19,7 +19,6 @@ except:
 
 DATADOG_PREFIX = "peppy"
 BOT_NAME = "Devlant" # YOU CAN CHANGE TO YOUR BOT NAME! #
-self = None
 application = None
 db = None
 redis = None

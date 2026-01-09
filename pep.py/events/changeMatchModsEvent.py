@@ -4,7 +4,7 @@ from constants import matchModModes
 from objects import glob
 
 
-def handle(userToken, packetData):
+def handle(tornadoRequest, userToken, packetData):
 	# Get token data
 	userID = userToken.userID
 

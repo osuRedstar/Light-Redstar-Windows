@@ -2,7 +2,7 @@ from objects import glob
 from constants import serverPackets
 from common.log import logUtils as log
 
-def handle(userToken, packetData):
+def handle(tornadoRequest, userToken, packetData):
 	# get token data
 	userID = userToken.userID
 

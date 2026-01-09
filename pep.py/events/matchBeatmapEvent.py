@@ -1,6 +1,6 @@
 from objects import glob
 
-def handle(userToken, _, has):
+def handle(tornadoRequest, userToken, _, has):
 	# Get usertoken data
 	userID = userToken.userID
 

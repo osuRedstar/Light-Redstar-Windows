@@ -7,7 +7,7 @@ from helpers import chatHelper as chat
 from objects import glob
 
 
-def handle(userToken, _=None, deleteToken=True):
+def handle(tornadoRequest, userToken, _=None, deleteToken=True):
 	# get usertoken data
 	userID = userToken.userID
 	username = userToken.username

@@ -13,8 +13,6 @@ class handler(requestsManager.asyncRequestHandler):
 	@tornado.web.asynchronous
 	@tornado.gen.engine
 	def asyncGet(self):
-		glob.self = self
-
 		try:
 			if self.request.host.startswith("assets"):
 				imageURL = bc.banchoConfig.config["menuIcon"]
@@ -42,7 +40,7 @@ class handler(requestsManager.asyncRequestHandler):
 				self.write(json.dumps(data, indent=2))
 			else:
 				self.set_status(403)
-				self.write('Host Is Not start "assets."')
+				self.write(f'Host Is Not start "assets.{glob.conf.config["server"]["server-domain"]}"')
 		except Exception as e:
 			log.error(f"menuIconHandler ERROR | {e}")
 			self.set_status(500)

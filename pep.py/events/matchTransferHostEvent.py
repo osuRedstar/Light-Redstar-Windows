@@ -1,7 +1,7 @@
 from objects import glob
 from constants import clientPackets
 
-def handle(userToken, packetData):
+def handle(tornadoRequest, userToken, packetData):
 	# Get packet data
 	packetData = clientPackets.transferHost(packetData)
 

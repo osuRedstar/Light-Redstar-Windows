@@ -1,4 +1,3 @@
 from events import matchBeatmapEvent
 
-def handle(userToken, packetData):
-	matchBeatmapEvent.handle(userToken, packetData, True)
+def handle(tornadoRequest, userToken, packetData): matchBeatmapEvent.handle(tornadoRequest, userToken, packetData, True)

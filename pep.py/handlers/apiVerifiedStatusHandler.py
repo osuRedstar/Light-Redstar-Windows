@@ -14,8 +14,6 @@ class handler(requestsManager.asyncRequestHandler):
 	@tornado.gen.engine
 	@sentry.captureTornado
 	def asyncGet(self):
-		glob.self = self
-
 		statusCode = 400
 		data = {"message": "unknown error"}
 		try:

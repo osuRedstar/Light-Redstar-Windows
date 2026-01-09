@@ -1,7 +1,7 @@
 from constants import clientPackets
 from objects import glob
 
-def handle(userToken, packetData):
+def handle(tornadoRequest, userToken, packetData):
 	# Read packet data. Same structure as changeMatchSettings
 	packetData = clientPackets.changeMatchSettings(packetData)
 

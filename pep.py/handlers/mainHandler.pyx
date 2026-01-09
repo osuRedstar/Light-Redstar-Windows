@@ -64,8 +64,6 @@ class handler(requestsManager.asyncRequestHandler):
 	@tornado.gen.engine
 	@sentry.captureTornado
 	def asyncPost(self):
-		glob.self = self
-
 		ip = self.getRequestIP()
 
 		# Track time if needed
@@ -116,7 +114,7 @@ class handler(requestsManager.asyncRequestHandler):
 					# Event handler
 					def handleEvent(ev):
 						def wrapper():
-							ev.handle(userToken, packetData)
+							ev.handle(self, userToken, packetData)
 						return wrapper
 
 					eventHandler = {

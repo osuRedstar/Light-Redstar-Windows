@@ -5,7 +5,7 @@ from constants import serverPackets
 from objects import glob
 
 
-def handle(userToken, packetData):
+def handle(tornadoRequest, userToken, packetData):
 	# read packet data
 	packetData = clientPackets.joinMatch(packetData)
 	matchID = packetData["matchID"]

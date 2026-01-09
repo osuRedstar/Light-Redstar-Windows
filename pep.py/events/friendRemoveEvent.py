@@ -3,10 +3,10 @@ from common.ripple import userUtils
 from constants import clientPackets
 
 
-def handle(userToken, packetData):
+def handle(tornadoRequest, userToken, packetData):
 	# Friend remove packet
-	packetData = clientPackets.addRemoveFriend(packetData)
-	userUtils.removeFriend(userToken.userID, packetData["friendID"])
+	friendID = clientPackets.addRemoveFriend(packetData)["friendID"]
+	userUtils.removeFriend(userToken.userID, friendID)
 
 	# Console output
-	log.info("{} have removed {} from their friends".format(userToken.username, str(packetData["friendID"])))
+	log.info(f"{userToken.username} have removed {str(friendID)} from their friends")

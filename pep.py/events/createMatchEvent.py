@@ -4,7 +4,7 @@ from constants import exceptions
 from objects import glob
 
 
-def handle(userToken, packetData):
+def handle(tornadoRequest, userToken, packetData):
 	try:
 		# get usertoken data
 		userID = userToken.userID

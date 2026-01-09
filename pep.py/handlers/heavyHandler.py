@@ -8,8 +8,6 @@ class handler(requestsManager.asyncRequestHandler):
 	@tornado.web.asynchronous
 	@tornado.gen.engine
 	def asyncGet(self):
-		glob.self = self
-
 		if not glob.debug:
 			self.write("Nope")
 			return

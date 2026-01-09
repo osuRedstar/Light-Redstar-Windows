@@ -1,6 +1,6 @@
 from objects import glob
 
-def handle(userToken, _):
+def handle(tornadoRequest, userToken, _):
 
 	# Get match ID and match object
 	matchID = userToken.matchID

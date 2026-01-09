@@ -10,7 +10,7 @@ from constants import slotStatuses
 from objects import glob
 
 
-def handle(userToken, packetData):
+def handle(tornadoRequest, userToken, packetData):
 	# Read new settings
 	packetData = clientPackets.changeMatchSettings(packetData)
 

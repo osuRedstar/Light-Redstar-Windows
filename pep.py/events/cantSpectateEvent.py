@@ -4,7 +4,7 @@ from constants import serverPackets
 from objects import glob
 
 
-def handle(userToken, _):
+def handle(tornadoRequest, userToken, _):
 	try:
 		# We don't have the beatmap, we can't spectate
 		if userToken.spectating not in glob.tokens.tokens:
