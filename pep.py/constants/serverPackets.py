@@ -64,7 +64,7 @@ def userSupporterGMT(supporter, GMT, tournamentStaff):
 		result |= userRanks.BAT
 	if tournamentStaff:
 		result |= userRanks.TOURNAMENT_STAFF
-	return packetHelper.buildPacket(packetIDs.server_supporterGMT, [[result, dataTypes.UINT32]])
+	return packetHelper.buildPacket(packetIDs.server_privileges, [[result, dataTypes.UINT32]])
 
 def friendList(userID):
 	friends = userUtils.getFriendList(userID)
@@ -158,7 +158,7 @@ def userPanel(userID, force = False):
 	##else:
 	##	userRank |= userRanks.NORMAL
 
-	return packetHelper.buildPacket(packetIDs.server_userPanel,
+	return packetHelper.buildPacket(packetIDs.server_userPresence,
 	[
 		[userID, dataTypes.SINT32],
 		[username, dataTypes.STRING],
@@ -344,6 +344,9 @@ def matchAbort():
 
 def switchServer(address):
 	return packetHelper.buildPacket(packetIDs.server_switchServer, [[address, dataTypes.STRING]])
+
+def switchTournamentServer(address):
+	return packetHelper.buildPacket(packetIDs.server_switchTournamentServer, [[address, dataTypes.STRING]])
 
 """ Other packets """
 def notification(message):

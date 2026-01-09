@@ -111,7 +111,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 					# Console output if needed
 					if glob.outputPackets and packetID != 4:
-						log.debug("Incoming packet ({})({}):\n\nPacket code: {}\nPacket length: {}\nSingle packet data: {}\n".format(requestTokenString, userToken.username, str(packetID), str(dataLength), str(packetData)))
+						log.debug(f"Incoming packet ({requestTokenString})({userToken.username}):\n\nPacket code: {str(packetID)}\nPacket length: {str(dataLength)}\nSingle packet data: {str(packetData)}\n")
 
 					# Event handler
 					def handleEvent(ev):
@@ -126,7 +126,7 @@ class handler(requestsManager.asyncRequestHandler):
 						packetIDs.client_friendRemove: handleEvent(friendRemoveEvent),
 						packetIDs.client_userStatsRequest: handleEvent(userStatsRequestEvent),
 						packetIDs.client_requestStatusUpdate: handleEvent(requestStatusUpdateEvent),
-						packetIDs.client_userPanelRequest: handleEvent(userPanelRequestEvent),
+						packetIDs.client_userPresenceRequest: handleEvent(userPanelRequestEvent),
 
 						packetIDs.client_channelJoin: handleEvent(channelJoinEvent),
 						packetIDs.client_channelPart: handleEvent(channelPartEvent),
@@ -161,7 +161,7 @@ class handler(requestsManager.asyncRequestHandler):
 						packetIDs.client_matchTransferHost: handleEvent(matchTransferHostEvent),
 						packetIDs.client_matchFailed: handleEvent(matchFailedEvent),
 						packetIDs.client_matchChangeTeam: handleEvent(matchChangeTeamEvent),
-						packetIDs.client_invite: handleEvent(matchInviteEvent),
+						packetIDs.client_matchInvite: handleEvent(matchInviteEvent),
 
 						packetIDs.client_tournamentMatchInfoRequest: handleEvent(tournamentMatchInfoRequestEvent),
 						packetIDs.client_tournamentJoinMatchChannel: handleEvent(tournamentJoinMatchChannelEvent),
@@ -174,7 +174,7 @@ class handler(requestsManager.asyncRequestHandler):
 						packetIDs.client_logout,
 						packetIDs.client_userStatsRequest,
 						packetIDs.client_requestStatusUpdate,
-						packetIDs.client_userPanelRequest,
+						packetIDs.client_userPresenceRequest,
 						packetIDs.client_changeAction,
 						packetIDs.client_channelJoin,
 						packetIDs.client_channelPart,
@@ -186,9 +186,9 @@ class handler(requestsManager.asyncRequestHandler):
 							if not userToken.restricted or (userToken.restricted and packetID in packetsRestricted):
 								eventHandler[packetID]()
 							else:
-								log.warning("{} | Ignored packet id from {} ({}) (user is restricted)".format(ip, requestTokenString, packetID))
+								log.warning(f"{ip} | Ignored packet id from {requestTokenString} ({packetID}) (user is restricted)")
 						else:
-							log.warning("{} | Unknown packet id from {} ({})".format(ip, requestTokenString, packetID))
+							log.warning(f"{ip} | Unknown packet id from {requestTokenString} ({packetID})")
 
 					# Update pos so we can read the next stacked packet
 					# +7 because we add packet ID bytes, unused byte and data length bytes
@@ -202,8 +202,8 @@ class handler(requestsManager.asyncRequestHandler):
 				# Token not found. Disconnect that user
 				responseData = serverPackets.loginError()
 				responseData += serverPackets.notification("Oh no! Debian have something wrong at the moment... Maybe try login again?")
-				log.warning("{} | Received packet from unknown token ({}).".format(ip, requestTokenString))
-				log.info("{} | {} has been disconnected (invalid token)".format(ip, requestTokenString))
+				log.warning(f"{ip} | Received packet from unknown token ({requestTokenString}).")
+				log.info(f"{ip} | {requestTokenString} has been disconnected (invalid token)")
 			finally:
 				# Unlock token
 				if userToken is not None:
@@ -221,7 +221,7 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Total time:
 			tt = float((et.microsecond-st.microsecond)/1000)
-			log.debug("Request time: {}ms".format(tt))
+			log.debug(f"Request time: {tt}ms")
 
 		# Send server's response to client
 		# We don't use token object because we might not have a token (failed login)

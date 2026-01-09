@@ -1722,6 +1722,27 @@ def switchServer(fro, chan, message):
 	# userToken.kick()
 	return "{} has been connected to {}".format(target, newServer)
 
+def switchTournamentServer(fro, chan, message):
+	# Get target user ID
+	target = message[0]
+	newServer = message[1].strip()
+	if not newServer:
+		return "Invalid server IP"
+	targetUserID = userUtils.getIDSafe(target)
+	userID = userUtils.getID(fro)
+
+	# Make sure the user exists
+	if not targetUserID:
+		return "{}: user not found".format(target)
+
+	# Connect the user to the end server
+	userToken = glob.tokens.getTokenFromUserID(userID, ignoreIRC=True, _all=False)
+	userToken.enqueue(serverPackets.switchTournamentServer(newServer))
+
+	# Disconnect the user from the origin server
+	# userToken.kick()
+	return "{} has been connected to {}".format(target, newServer)
+
 def rtx(fro, chan, message):
 	target = message[0]
 	message = " ".join(message[1:]).strip()
@@ -3329,6 +3350,11 @@ commands = [
 		"privileges": privileges.ADMIN_MANAGE_SERVERS,
 		"syntax": "<username> <server_address>",
 		"callback": switchServer
+	}, {
+		"trigger": "!switchtournamentserver",
+		"privileges": privileges.ADMIN_MANAGE_SERVERS,
+		"syntax": "<username> <server_address>",
+		"callback": switchTournamentServer
 	}, {
 		"trigger": "!rtx",
 		"privileges": privileges.ADMIN_MANAGE_USERS,
