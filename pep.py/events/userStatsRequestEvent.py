@@ -2,8 +2,7 @@ from common.log import logUtils as log
 from constants import clientPackets
 from constants import serverPackets
 
-
-def handle(tornadoRequest, userToken, packetData):
+def handle(userToken, packetData):
 	# Read userIDs list
 	packetData = clientPackets.userStatsRequest(packetData)
 
@@ -13,11 +12,10 @@ def handle(tornadoRequest, userToken, packetData):
 		return
 
 	for i in packetData["users"]:
-		log.debug("Sending stats for user {}".format(i))
+		log.debug(f"Sending stats for user {i}")
 
 		# Skip our stats
-		if i == userToken.userID:
-			continue
+		if i == userToken.userID: continue
 
 		# Enqueue stats packets relative to this user
 		userToken.enqueue(serverPackets.userStats(i))

@@ -3,7 +3,7 @@ from constants import clientPackets
 from constants import serverPackets
 from objects import glob
 
-def handle(tornadoRequest, userToken, packetData):
+def handle(userToken, packetData):
 	# get token data
 	username = userToken.username
 
@@ -14,9 +14,6 @@ def handle(tornadoRequest, userToken, packetData):
 	userToken.awayMessage = packetData["awayMessage"]
 
 	# Send private message from the bot
-	if packetData["awayMessage"] == "":
-		fokaMessage = "Your away message has been reset"
-	else:
-		fokaMessage = "Your away message is now: {}".format(packetData["awayMessage"])
+	fokaMessage = "Your away message has been reset" if userToken.awayMessage == "" else f"Your away message is now: {userToken.awayMessage}"
 	userToken.enqueue(serverPackets.sendMessage(glob.BOT_NAME, username, fokaMessage))
-	log.info("{} has changed their away message to: {}".format(username, packetData["awayMessage"]))
+	log.info(f"{username} has changed their away message to: {userToken.awayMessage}")

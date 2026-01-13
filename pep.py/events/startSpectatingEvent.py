@@ -3,7 +3,7 @@ from constants import clientPackets
 from constants import exceptions
 from objects import glob
 
-def handle(tornadoRequest, userToken, packetData):
+def handle(userToken, packetData):
 	try:
 		# Start spectating packet
 		packetData = clientPackets.startSpectating(packetData)
@@ -15,8 +15,7 @@ def handle(tornadoRequest, userToken, packetData):
 
 		# Get host token
 		targetToken = glob.tokens.getTokenFromUserID(packetData["userID"])
-		if targetToken is None:
-			raise exceptions.tokenNotFoundException
+		if targetToken is None: raise exceptions.tokenNotFoundException
 
 		# Start spectating new user
 		userToken.startSpectating(targetToken)

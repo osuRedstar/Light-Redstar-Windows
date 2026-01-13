@@ -6,8 +6,7 @@ from constants import serverPackets
 from helpers import chatHelper as chat
 from objects import glob
 
-
-def handle(tornadoRequest, userToken, _=None, deleteToken=True):
+def handle(userToken, _=None, deleteToken=True):
 	# get usertoken data
 	userID = userToken.userID
 	username = userToken.username
@@ -25,8 +24,7 @@ def handle(tornadoRequest, userToken, _=None, deleteToken=True):
 		userToken.leaveMatch()
 		
 		# Part all joined channels
-		for i in userToken.joinedChannels:
-			chat.partChannel(token=userToken, channel=i)
+		for i in userToken.joinedChannels: chat.partChannel(token=userToken, channel=i)
 
 		# Leave all joined streams
 		userToken.leaveAllStreams()
@@ -35,24 +33,21 @@ def handle(tornadoRequest, userToken, _=None, deleteToken=True):
 		glob.streams.broadcast("main", serverPackets.userLogout(userID))
 
 		# Disconnect from IRC if needed
-		if userToken.irc and glob.irc:
-			glob.ircServer.forceDisconnection(userToken.username)
+		if userToken.irc and glob.irc: glob.ircServer.forceDisconnection(userToken.username)
 
 		# Delete token
-		if deleteToken:
-			glob.tokens.deleteToken(requestToken)
-		else:
-			userToken.kicked = True
+		if deleteToken: glob.tokens.deleteToken(requestToken)
+		else: userToken.kicked = True
 
 		glob.db.execute("UPDATE users_stats SET current_status = 'Offline' WHERE id = %s", [userID])
 		# Change username if needed
 		newUsername = glob.redis.get("ripple:change_username_pending:{}".format(userID))
 		if newUsername is not None:
-			log.debug("Sending username change request for user {}".format(userID))
+			log.debug(f"Sending username change request for user {userID}")
 			glob.redis.publish("peppy:change_username", json.dumps({
 				"userID": userID,
 				"newUsername": newUsername.decode("utf-8")
 			}))
 
 		# Console output
-		log.info("{} has been disconnected. (logout)".format(username))
+		log.info(f"{userToken.ip} | {username} has been disconnected. (logout)")

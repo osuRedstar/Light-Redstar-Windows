@@ -9,8 +9,7 @@ from constants import matchTeams
 from constants import slotStatuses
 from objects import glob
 
-
-def handle(tornadoRequest, userToken, packetData):
+def handle(userToken, packetData):
 	# Read new settings
 	packetData = clientPackets.changeMatchSettings(packetData)
 
@@ -18,13 +17,11 @@ def handle(tornadoRequest, userToken, packetData):
 	matchID = userToken.matchID
 		
 	# Make sure the match exists
-	if matchID not in glob.matches.matches:
-		return
+	if matchID not in glob.matches.matches: return
 
 	# Host check
 	with glob.matches.matches[matchID] as match:
-		if userToken.userID != match.hostUserID:
-			return
+		if userToken.userID != match.hostUserID: return
 
 		# Some dank memes easter egg
 		memeTitles = [
@@ -58,10 +55,7 @@ def handle(tornadoRequest, userToken, packetData):
 
 		# Update match settings
 		match.inProgress = packetData["inProgress"]
-		if packetData["matchPassword"] != "":
-			match.matchPassword = generalUtils.stringMd5(packetData["matchPassword"])
-		else:
-			match.matchPassword = ""
+		match.matchPassword = generalUtils.stringMd5(packetData["matchPassword"]) if packetData["matchPassword"] != "" else ""
 		match.beatmapName = packetData["beatmapName"]
 		match.beatmapID = packetData["beatmapID"]
 		match.hostUserID = packetData["hostUserID"]
@@ -78,8 +72,7 @@ def handle(tornadoRequest, userToken, packetData):
 		match.matchModMode = packetData["freeMods"]
 
 		# Reset ready if needed
-		if oldMods != match.mods or oldBeatmapMD5 != match.beatmapMD5:
-			match.resetReady()
+		if oldMods != match.mods or oldBeatmapMD5 != match.beatmapMD5: match.resetReady()
 
 		# Reset mods if needed
 		if match.matchModMode == matchModModes.NORMAL:
@@ -90,15 +83,13 @@ def handle(tornadoRequest, userToken, packetData):
 			match.mods = 0
 
 		# Initialize teams if team type changed
-		if match.matchTeamType != oldMatchTeamType:
-			match.initializeTeams()
+		if match.matchTeamType != oldMatchTeamType: match.initializeTeams()
 
 		# Force no freemods if tag coop
-		if match.matchTeamType == matchTeamTypes.TAG_COOP or match.matchTeamType == matchTeamTypes.TAG_TEAM_VS:
-			match.matchModMode = matchModModes.NORMAL
+		if match.matchTeamType == matchTeamTypes.TAG_COOP or match.matchTeamType == matchTeamTypes.TAG_TEAM_VS: match.matchModMode = matchModModes.NORMAL
 
 		# Send updated settings
 		match.sendUpdates()
 
 		# Console output
-		log.info("MPROOM{}: Updated room settings".format(match.matchID))
+		log.info(f"MPROOM{match.matchID}: Updated room settings")

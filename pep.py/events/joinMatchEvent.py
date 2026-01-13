@@ -4,8 +4,7 @@ from constants import exceptions
 from constants import serverPackets
 from objects import glob
 
-
-def handle(tornadoRequest, userToken, packetData):
+def handle(userToken, packetData):
 	# read packet data
 	packetData = clientPackets.joinMatch(packetData)
 	matchID = packetData["matchID"]
@@ -14,8 +13,7 @@ def handle(tornadoRequest, userToken, packetData):
 	# Get match from ID
 	try:
 		# Make sure the match exists
-		if matchID not in glob.matches.matches:
-			return
+		if matchID not in glob.matches.matches: return
 
 		# Hash password if needed
 		# if password != "":
@@ -23,11 +21,10 @@ def handle(tornadoRequest, userToken, packetData):
 
 		# Check password
 		with glob.matches.matches[matchID] as match:
-			if match.matchPassword != "" and match.matchPassword != password:
-				raise exceptions.matchWrongPasswordException()
+			if match.matchPassword != "" and match.matchPassword != password: raise exceptions.matchWrongPasswordException()
 
 			# Password is correct, join match
 			userToken.joinMatch(matchID)
 	except exceptions.matchWrongPasswordException:
 		userToken.enqueue(serverPackets.matchJoinFail())
-		log.warning("{} has tried to join a mp room, but he typed the wrong password".format(userToken.username))
+		log.warning(f"{userToken.username} has tried to join a mp room, but he typed the wrong password")

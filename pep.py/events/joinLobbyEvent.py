@@ -2,8 +2,7 @@ from common.log import logUtils as log
 from constants import serverPackets
 from objects import glob
 
-
-def handle(tornadoRequest, userToken, _):
+def handle(userToken, _):
 	# Get userToken data
 	username = userToken.username
 
@@ -11,8 +10,7 @@ def handle(tornadoRequest, userToken, _):
 	userToken.joinStream("lobby")
 
 	# Send matches data
-	for key, _ in glob.matches.matches.items():
-		userToken.enqueue(serverPackets.createMatch(key))
+	for key, _ in glob.matches.matches.items(): userToken.enqueue(serverPackets.createMatch(key))
 
 	# Console output
-	log.info("{} has joined multiplayer lobby".format(username))
+	log.info(f"{username} has joined multiplayer lobby")

@@ -1,7 +1,7 @@
 from common.log import logUtils as log
 from helpers import chatHelper as chat
 
-def handle(tornadoRequest, userToken, _):
+def handle(userToken, _):
 	# Get usertoken data
 	username = userToken.username
 
@@ -13,4 +13,4 @@ def handle(tornadoRequest, userToken, _):
 	chat.partChannel(channel="#lobby", token=userToken, kick=True)
 
 	# Console output
-	log.info("{} has left multiplayer lobby".format(username))
+	log.info(f"{username} has left multiplayer lobby")

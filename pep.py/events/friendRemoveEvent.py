@@ -2,8 +2,7 @@ from common.log import logUtils as log
 from common.ripple import userUtils
 from constants import clientPackets
 
-
-def handle(tornadoRequest, userToken, packetData):
+def handle(userToken, packetData):
 	# Friend remove packet
 	friendID = clientPackets.addRemoveFriend(packetData)["friendID"]
 	userUtils.removeFriend(userToken.userID, friendID)

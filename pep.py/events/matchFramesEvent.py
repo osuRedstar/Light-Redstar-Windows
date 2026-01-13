@@ -1,7 +1,7 @@
 from objects import glob
 from constants import serverPackets, clientPackets
 
-def handle(tornadoRequest, userToken, packetData):
+def handle(userToken, packetData):
 	# Get usertoken data
 	userID = userToken.userID
 
@@ -9,12 +9,10 @@ def handle(tornadoRequest, userToken, packetData):
 	matchID = userToken.matchID
 
 	# Make sure we are in a match
-	if matchID == -1:
-		return
+	if matchID == -1: return
 
 	# Make sure the match exists
-	if matchID not in glob.matches.matches:
-		return
+	if matchID not in glob.matches.matches: return
 
 	# Parse the data
 	data = clientPackets.matchFrames(packetData)

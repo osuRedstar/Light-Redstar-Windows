@@ -2,8 +2,7 @@ from common.log import logUtils as log
 from constants import clientPackets
 from constants import serverPackets
 
-
-def handle(tornadoRequest, userToken, packetData):
+def handle(userToken, packetData):
 	# Read userIDs list
 	packetData = clientPackets.userPanelRequest(packetData)
 
@@ -14,5 +13,5 @@ def handle(tornadoRequest, userToken, packetData):
 
 	for i in packetData["users"]:
 		# Enqueue userpanel packets relative to this user
-		log.debug("Sending panel for user {}".format(i))
+		log.debug(f"Sending panel for user {i}")
 		userToken.enqueue(serverPackets.userPanel(i))

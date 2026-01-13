@@ -1,6 +1,6 @@
 from objects import glob
 
-def handle(tornadoRequest, userToken, _):
+def handle(userToken, _):
 	# Read token data
 	userID = userToken.userID
 
@@ -8,13 +8,10 @@ def handle(tornadoRequest, userToken, _):
 	matchID = userToken.matchID
 
 	# Make sure we are in a match
-	if matchID == -1:
-		return
+	if matchID == -1: return
 
 	# Make sure the match exists
-	if matchID not in glob.matches.matches:
-		return
+	if matchID not in glob.matches.matches: return
 
 	# Change team
-	with glob.matches.matches[matchID] as match:
-		match.changeTeam(userID)
+	with glob.matches.matches[matchID] as match: match.changeTeam(userID)

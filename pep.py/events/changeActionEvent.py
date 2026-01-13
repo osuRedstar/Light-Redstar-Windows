@@ -6,7 +6,7 @@ from constants import serverPackets
 from objects import glob
 from common.constants import mods
 
-def handle(tornadoRequest, userToken, packetData):
+def handle(userToken, packetData):
 	# Get usertoken data
 	userID = userToken.userID
 	username = userToken.username
@@ -127,5 +127,4 @@ if userToken.matchID != -1 and userToken.actionID != actions.MULTIPLAYING and us
 			i.enqueue(serverPackets.userStats(userID, force))
 
 	# Console output
-	ip = tornadoRequest.getRequestIP()
-	log.info("{} | {} changed action: {} [{}][{}][{}]".format(ip, username, str(userToken.actionID), userToken.actionText, userToken.actionMd5, userToken.beatmapID))
+	log.info(f"{userToken.ip} | {username} changed action: {str(userToken.actionID)} [{userToken.actionText}][{userToken.actionMd5}][{userToken.beatmapID}]")

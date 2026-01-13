@@ -3,8 +3,7 @@ from constants import clientPackets, serverPackets
 from constants import exceptions
 from objects import glob
 
-
-def handle(tornadoRequest, userToken, packetData):
+def handle(userToken, packetData):
 	try:
 		# get usertoken data
 		userID = userToken.userID
@@ -14,16 +13,14 @@ def handle(tornadoRequest, userToken, packetData):
 
 		# Make sure the name is valid
 		matchName = packetData["matchName"].strip()
-		if not matchName:
-			raise exceptions.matchCreateError()
+		if not matchName: raise exceptions.matchCreateError()
 
 		# Create a match object
 		# TODO: Player number check
 		matchID = glob.matches.createMatch(matchName, packetData["matchPassword"].strip(), packetData["beatmapID"], packetData["beatmapName"], packetData["beatmapMD5"], packetData["gameMode"], userID)
 		
 		# Make sure the match has been created
-		if matchID not in glob.matches.matches:
-			raise exceptions.matchCreateError()
+		if matchID not in glob.matches.matches: raise exceptions.matchCreateError()
 
 		with glob.matches.matches[matchID] as match:
 			# Join that match
@@ -31,8 +28,7 @@ def handle(tornadoRequest, userToken, packetData):
 
 			# Multiplayer Room Patch
 			for i in range(0,16):
-				if match.slots[i].status is not 4:
-					match.slots[i].status = packetData["slot{}Status".format(i)]
+				if match.slots[i].status is not 4: match.slots[i].status = packetData[f"slot{i}Status"]
 
 			
 			# Give host to match creator
