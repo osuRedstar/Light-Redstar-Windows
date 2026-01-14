@@ -194,7 +194,7 @@ class handler(requestsManager.asyncRequestHandler):
 				userToken.resetQueue()
 			except exceptions.tokenNotFoundException:
 				# Token not found. Disconnect that user
-				responseData = serverPackets.loginError()
+				responseData = serverPackets.banchoRestart(0)
 				responseData += serverPackets.notification("Oh no! Debian have something wrong at the moment... Maybe try login again?")
 				log.warning(f"{ip} | Received packet from unknown token ({requestTokenString}).")
 				log.info(f"{ip} | {requestTokenString} has been disconnected (invalid token)")
