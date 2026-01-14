@@ -198,7 +198,6 @@ def userStats(userID, force = False):
 			[userToken.pp, dataTypes.UINT64]
 		])
 
-	log.warning(f"[userToken.pp, dataTypes.UINT64] = {[userToken.pp, dataTypes.UINT64]}")
 	return packetHelper.buildPacket(packetIDs.server_userStats,
 	[
 		[userID, dataTypes.UINT32],

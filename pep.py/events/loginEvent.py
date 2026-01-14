@@ -108,7 +108,7 @@ def handle(tornadoRequest):
 		isTournament = "tourney" in osuVersion
 		if not isTournament:
 			glob.tokens.deleteOldTokens(userID)
-		responseToken = glob.tokens.addToken(userID, requestIP, timeOffset=timeOffset, tournament=isTournament)
+		responseToken = glob.tokens.addToken(userID, requestIP, tornadoRequest.request.host, timeOffset=timeOffset, tournament=isTournament)
 		responseTokenString = responseToken.token
 
 		# Check restricted mode (and eventually send message)

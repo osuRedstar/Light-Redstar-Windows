@@ -34,12 +34,6 @@ requestHeaders = {"User-Agent": f"c.{server_domain}"}
 
 def exceptionE(msg=""): e = traceback.format_exc(); log.error(f"{msg} \n{e}"); return e
 
-def userDomainCheck():
-	try:
-		userDomain = re.sub(r"^c\d*\.|^ce\.", "", glob.self.request.host)
-		return server_domain if userDomain == server_domain else userDomain
-	except Exception as e: print(e); return server_domain
-
 # Redstar, catboy, 네리냥, catboy, 치무, 블켓, 사요봇, 비트,
 def redstarMessage(beatmapID):
 	beatmap = glob.db.fetch("SELECT song_name, beatmapset_id FROM beatmaps WHERE beatmap_id = %s LIMIT 1", [beatmapID])
@@ -561,7 +555,7 @@ def getPPMessage(userID, just_data = False):
 		# Return response in chat
 		# Song name and mods
 		#msg = "{song}{plus}{mods}  ".format(song=data["song_name"], plus="+" if currentMods > 0 else "", mods=scoreUtils.readableMods(currentMods))
-		msg = "[https://osu.ppy.sh/b/{bid} Bancho] | [https://osu.{domain}/b/{bid} {song}] {plus}{mods}  ".format(domain=userDomainCheck(), bid=currentMap, song=data["song_name"], plus="+" if currentMods > 0 else "", mods=scoreUtils.readableMods(currentMods))
+		msg = "[https://osu.ppy.sh/b/{bid} Bancho] | [https://osu.{domain}/b/{bid} {song}] {plus}{mods}  ".format(domain=token.userDomain, bid=currentMap, song=data["song_name"], plus="+" if currentMods > 0 else "", mods=scoreUtils.readableMods(currentMods))
 
 		# PP values
 		""" if currentAcc == -1:
@@ -921,7 +915,7 @@ def tillerinoLast(fro, chan, message, bpp_command = False):
 
 		ifFc = " | {}x (FC)".format(data["fc"]) if data["max_combo"] == data["fc"] else " | {0}x/{1}x".format(data["max_combo"], data["fc"])
 		#beatmapLink = "[http://redstar.moe/b/{1} {0}]".format(data["sn"], data["bid"])
-		beatmapLink = "[https://osu.{}/b/{} {}]".format(userDomainCheck(), data["bid"], data["sn"])
+		beatmapLink = "[https://osu.{}/b/{} {}]".format(token.userDomain, data["bid"], data["sn"])
 		hasPP = data["play_mode"] != gameModes.CTB
 
 		#위에서 할당됨
@@ -1062,13 +1056,16 @@ def tillerinoLast(fro, chan, message, bpp_command = False):
 
 
 def getBeatmapRequest(fro, chan, message): # Grab a random beatmap request. TODO: Add gamemode handling to this and !request
+	token = glob.tokens.getTokenFromUsername(fro)
+	if token is None: return False
+
 	request = glob.db.fetch("SELECT * FROM rank_requests WHERE active = 1 LIMIT 1;")
 	if request is not None:
 		username = userUtils.getUsername(request['userid'])
 		mapData = glob.db.fetch("SELECT song_name, ranked FROM beatmaps WHERE beatmap_id = {} ORDER BY difficulty_std DESC LIMIT 1;".format(request['bid']))
 		glob.db.execute("DELETE FROM rank_requests WHERE id = {};".format(request['id']))
 		#return "[https://debian.moe/u/{userID} {username}] nominated beatmap: [https://osu.ppy.sh/b/{beatmapID} {songName}] for status change. {AinuBeatmapLink}The request has been deleted, so please decide it's status.".format(userID=request['userid'], username=username, beatmapID=request['bid'], songName=mapData['song_name'], AinuBeatmapLink='[https://debian.moe/b/{} Ainu beatmap Link]. '.format(request['bid']))
-		return "[https://{domain}/u/{userID} {username}] nominated beatmap: [https://osu.{domain}/b/{beatmapID} {songName}] for status change. {AinuBeatmapLink}The request has been deleted, so please decide it's status.".format(domain=server_domain, userID=request['userid'], username=username, beatmapID=request['bid'], songName=mapData['song_name'], AinuBeatmapLink='[https://{}/b/{} Ainu beatmap Link]. '.format(userDomainCheck(), request['bid']))
+		return "[https://{domain}/u/{userID} {username}] nominated beatmap: [https://osu.{domain}/b/{beatmapID} {songName}] for status change. {AinuBeatmapLink}The request has been deleted, so please decide it's status.".format(domain=server_domain, userID=request['userid'], username=username, beatmapID=request['bid'], songName=mapData['song_name'], AinuBeatmapLink=f"[https://{token.userDomain}/b/{request['bid']} Ainu beatmap Link]. ")
 	else:
 		return "All nominations have been checked. Thank you for your hard work! :)"
 	
@@ -1875,9 +1872,9 @@ def editMap(fro, chan, message): # Using Atoka's editMap with Aoba's edit
 		# Announce / Log to admin panel logs when ranked status is changed
 		log.rap(userID, "has {} beatmap ({}): {} ({})".format(status, mapType, beatmapData["song_name"], mapID), True)
 		if mapType.lower() == 'set':
-			msg = f"{ForceMessage}[https://{server_domain}/u/{userID} {fro}] has {status} beatmap set: [https://osu.{userDomainCheck()}/s/{beatmapData['beatmapset_id']} {BmapName}]"
+			msg = f"{ForceMessage}[https://{server_domain}/u/{userID} {fro}] has {status} beatmap set: [https://osu.{token.userDomain}/s/{beatmapData['beatmapset_id']} {BmapName}]"
 		else:
-			msg = f"{ForceMessage}[https://{server_domain}/u/{userID} {fro}] has {status} beatmap: [https://osu.{userDomainCheck()}/b/{mapID} {beatmapData['song_name']}]"
+			msg = f"{ForceMessage}[https://{server_domain}/u/{userID} {fro}] has {status} beatmap: [https://osu.{token.userDomain}/b/{mapID} {beatmapData['song_name']}]"
 
 		chat.sendMessage(glob.BOT_NAME, "#ranked", msg)
 		
@@ -2342,7 +2339,7 @@ def ingame_rank_request(fro, chan, message):
 		bmapi = glob.db.fetch("SELECT b.ranked, b.rankedby, b.song_name, u.username FROM beatmaps as b LEFT JOIN users as u ON b.rankedby = u.id WHERE b.beatmap_id = %s", [bid])
 		if bmapi["ranked"] != 0:
 			rankedby_msg = f"[https://{server_domain}/u/{bmapi['rankedby']} {bmapi['username']}]" if bmapi["rankedby"] != "Bancho" else "Bancho"
-			return f"refuse [https://{server_domain}/u/{userID} {fro}] | [https://osu.{userDomainCheck()}/b/{bid} {bmapi['song_name']}] is {ranked_status[bmapi['ranked']]} by {rankedby_msg}"
+			return f"refuse [https://{server_domain}/u/{userID} {fro}] | [https://osu.{token.userDomain}/b/{bid} {bmapi['song_name']}] is {ranked_status[bmapi['ranked']]} by {rankedby_msg}"
 		elif bmapi["ranked"] == 0:
 			glob.db.execute("UPDATE beatmaps SET rankedby = 999, ranked = 4, ranked_status_freezed = 1 WHERE beatmapset_id = %s", [BeatmapSet])
 			glob.db.execute(f"INSERT INTO rank_requests (userid, bid, time, blacklisted, active) VALUES (%s, %s, %s, %s, %s)", [userID, bid, time.time(), 0, 1])
@@ -2368,7 +2365,7 @@ def ingame_rank_request(fro, chan, message):
 			webhook.execute()
 		except: return exceptionE("ERROR: 디코 웹훅 + 인게임 알림 작업 실패")
 	threading.Thread(target=swm).start()
-	return f"[https://{server_domain}/u/{userID} {fro}] | [https://osu.{userDomainCheck()}/s/{BeatmapSet} {bmapi['song_name']}] Changed Qualified!"
+	return f"[https://{server_domain}/u/{userID} {fro}] | [https://osu.{token.userDomain}/s/{BeatmapSet} {bmapi['song_name']}] Changed Qualified!"
 
 def ingame_rank_requests(fro, chan, message):
 	rqs = glob.db.fetchAll("SELECT rr.userid, u.username, rr.bid, b.song_name, FROM_UNIXTIME(rr.time) AS timez FROM rank_requests AS rr LEFT JOIN beatmaps as b ON rr.bid = b.beatmap_id LEFT JOIN users AS u ON rr.userid = u.id WHERE active = 1")
@@ -2526,9 +2523,9 @@ def song_info(fro, chan, message):
 			creator = f"Not Found"
 		
 		msg = f"[https://{server_domain}/u/{userID} {fro}] | "
-		msg += f"[https://osu.{userDomainCheck()}/b/{bid} {songinfo['song_name']}] is {ranked_status_txt} {rankedby_msg}{redstar_last_update_date} | "
+		msg += f"[https://osu.{token.userDomain}/b/{bid} {songinfo['song_name']}] is {ranked_status_txt} {rankedby_msg}{redstar_last_update_date} | "
 		msg += f"{newMods_name} is [{request_link} {pp_msg}] | "
-		msg += f"Beatmap_md5 = [https://old.{server_domain}/letsapi/v1/find-beatmap-md5?md5={songinfo['beatmap_md5']} {songinfo['beatmap_md5']}], BeatmapID = [https://{userDomainCheck()}/b/{songinfo['beatmap_id']} {songinfo['beatmap_id']}], BeatmapSetID = [https://osu.ppy.sh/s/{songinfo['beatmapset_id']} {songinfo['beatmapset_id']}] | "
+		msg += f"Beatmap_md5 = [https://old.{server_domain}/letsapi/v1/find-beatmap-md5?md5={songinfo['beatmap_md5']} {songinfo['beatmap_md5']}], BeatmapID = [https://{token.userDomain}/b/{songinfo['beatmap_id']} {songinfo['beatmap_id']}], BeatmapSetID = [https://osu.ppy.sh/s/{songinfo['beatmapset_id']} {songinfo['beatmapset_id']}] | "
 		msg += f"length = {length}, maxCombo = {songinfo['max_combo']}, bpm = {songinfo['bpm']}, AR = {songinfo['ar']}, OD = {songinfo['od']} | "
 		msg += f"difficulty_std = {songinfo['difficulty_std']}, difficulty_taiko = {songinfo['difficulty_taiko']}, difficulty_ctb = {songinfo['difficulty_ctb']}, difficulty_mania = {songinfo['difficulty_mania']} | "
 		msg += f"Creator = {creator}, submit_date = {bancho_info['submit_date']}, last_update = {bancho_info['last_update']}, approved_date = {bancho_info['approved_date']}, ({bancho_ranked_status} In Bancho) | "
@@ -2538,14 +2535,14 @@ def song_info(fro, chan, message):
 	except:
 		log.error("ERROR | song_info() 함수 예외처리됨")
 		msg = f"ERROR | [https://{server_domain}/u/{userID} {fro}] | "
-		msg += f"[https://osu.{userDomainCheck()}/b/{bid} {bid}] beatmap does not exist in Redstar DB. Most likely a map that has been removed from Bancho."
+		msg += f"[https://osu.{token.userDomain}/b/{bid} {bid}] beatmap does not exist in Redstar DB. Most likely a map that has been removed from Bancho."
 		return msg
 	
 def md5tobid(fro, chan, message):
 	userID = userUtils.getID(fro)
 	try:
 		r = requests.get(f"{letsapiurl}/v1/find-beatmap-md5?md5={message[0]}").json()
-		msg = f"[https://{server_domain}/u/{userID} {fro}] | [https://old.{server_domain}/letsapi/v1/find-beatmap-md5?md5={message[0]} Link]  [https://osu.{userDomainCheck()}/b/{r['beatmap_id']} {r['beatmap_id']}]"
+		msg = f"[https://{server_domain}/u/{userID} {fro}] | [https://old.{server_domain}/letsapi/v1/find-beatmap-md5?md5={message[0]} Link]  [https://osu.{token.userDomain}/b/{r['beatmap_id']} {r['beatmap_id']}]"
 		return msg
 	except:
 		log.error("ERROR | md5tobid() 함수 예외처리됨")
@@ -2700,7 +2697,7 @@ def replayID_convert(fro, chan, message):
 	rank = generalUtils.getRank(score_info["play_mode"], score_info["mods"], score_info["accuracy"],
 									score_info["300_count"], score_info["100_count"], score_info["50_count"], score_info["misses_count"])
 	
-	msg = f"[{type[0]}] [https://{server_domain}/u/{type[2]}{userID} {uname['username']}] | [https://osu.{userDomainCheck()}/b/{beatmap_info['beatmap_id']} {beatmap_info['song_name']}]"
+	msg = f"[{type[0]}] [https://{server_domain}/u/{type[2]}{userID} {uname['username']}] | [https://osu.{token.userDomain}/b/{beatmap_info['beatmap_id']} {beatmap_info['song_name']}]"
 	msg += f" + {mods}" if mods != "" else ""
 	msg += f" ({round(score_info['accuracy'], 2)}%, {rank})"
 	#ranked_status추가
@@ -2731,7 +2728,7 @@ def replayID_convert(fro, chan, message):
 	else:
 		msg += " | UNKNOWN gamemode"
 	msg += f" | {round(score_info['pp'], 2)}pp | completed = {score_info['completed']} | {unix_to_date(score_info['time'])}"
-	msg += f" | BeatmapID = [https://{userDomainCheck()}/b/{beatmap_info['beatmap_id']} {beatmap_info['beatmap_id']}], BeatmapSetID = [https://osu.ppy.sh/s/{beatmap_info['beatmapset_id']} {beatmap_info['beatmapset_id']}]"
+	msg += f" | BeatmapID = [https://{token.userDomain}/b/{beatmap_info['beatmap_id']} {beatmap_info['beatmap_id']}], BeatmapSetID = [https://osu.ppy.sh/s/{beatmap_info['beatmapset_id']} {beatmap_info['beatmapset_id']}]"
 	msg += f" | [https://{server_domain}/web/replays{type[1]}/{replayID} Replay download] | [osu://b/{beatmap_info['beatmap_id']} osu!direct]"
 
 	return msg
@@ -2781,7 +2778,7 @@ def history_beatmap(fro, chan, message):
 		msg += f"[https://{server_domain}/u/{type[2]}{userID} {fro}] | "
 
 		#beatmapLink
-		msg  += "[https://osu.{}/b/{} {}]".format(userDomainCheck(), bid, beatmap_info["song_name"])
+		msg  += f"[https://osu.{token.userDomain}/b/{bid} {beatmap_info['song_name']}]"
 
 		if data["play_mode"] != gameModes.STD:
 			msg += " <{0}>".format(gameModes.getGameModeForPrinting(data["play_mode"]))
@@ -2920,7 +2917,7 @@ def map_suggest(fro, chan, message):
 			values = ("NULL", mapType, setbid, data["song_name"], ppMsg, int(time.time()))
 			try:
 				glob.db.execute(query, values)
-				return f"Success INSERT | {mapType} | [https://osu.{userDomainCheck()}/b/{setbid} {data['song_name']}] | pp = {ppMsg} | [osu://b/{setbid} osu!direct]"
+				return f"Success INSERT | {mapType} | [https://osu.{token.userDomain}/b/{setbid} {data['song_name']}] | pp = {ppMsg} | [osu://b/{setbid} osu!direct]"
 			except:
 				log.error(f"setbid = {setbid} | DB INSERT 실패!")
 				return f"setbid = {setbid} | DB INSERT Fail!"
@@ -2928,7 +2925,7 @@ def map_suggest(fro, chan, message):
 			return "You have not set Permission!"
 	else:
 		for i in mapList:
-			fokamessage(fro, f"{mapType} | [https://osu.{userDomainCheck()}/b/{i['beatmap_id']} {i['song_name']}] | pp = {i['ppMsg']} | [osu://b/{i['beatmap_id']} osu!direct]")
+			fokamessage(fro, f"{mapType} | [https://osu.{token.userDomain}/b/{i['beatmap_id']} {i['song_name']}] | pp = {i['ppMsg']} | [osu://b/{i['beatmap_id']} osu!direct]")
 		return f"[https://{server_domain}/u/{userID} {fro}] Check [https://{server_domain}/u/999 Devlant]'s message!"
 
 def servers_status(fro, chan, message):
@@ -3056,7 +3053,7 @@ def tillerinoRecommand(fro, chan, message):
 	log.warning(rc)
 
 	#msg2 = "[{url} 100%: {pp100}pp | 99% {pp99}pp | 98%: {pp98}pp | 95%: {pp95}pp]".format(url=url, pp100=round(odata["pp"][0], 2), pp99=round(odata["pp"][1], 2), pp98=round(odata["pp"][2], 2), pp95=round(odata["pp"][3], 2))
-	return f"[https://osu.{userDomainCheck()}/b/{rc['bid']} {rc['songname']}] {f'+{mods.upper()}' if modsNum != 0 else ''} 100%: {rc['pp100']}pp | 99% {rc['pp99']}pp | 98%: {rc['pp98']}pp | 95%: {rc['pp95']}pp [osu://b/{rc['bid']} osu!direct]"
+	return f"[https://osu.{token.userDomain}/b/{rc['bid']} {rc['songname']}] {f'+{mods.upper()}' if modsNum != 0 else ''} 100%: {rc['pp100']}pp | 99% {rc['pp99']}pp | 98%: {rc['pp98']}pp | 95%: {rc['pp95']}pp [osu://b/{rc['bid']} osu!direct]"
 
 def B_dl(fro, chan, message):
 	token = glob.tokens.getTokenFromUsername(fro)

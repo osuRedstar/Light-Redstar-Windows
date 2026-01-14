@@ -11,9 +11,8 @@ from events import logoutEvent
 from helpers import chatHelper as chat
 from objects import glob
 
-
 class token:
-	def __init__(self, userID, token_ = None, ip ="", irc = False, timeOffset = 0, tournament = False):
+	def __init__(self, userID, token_ = None, ip ="", userDomain = "", irc = False, timeOffset = 0, tournament = False):
 		"""
 		Create a token object and set userID and token
 
@@ -54,6 +53,7 @@ class token:
 		self.location = [0,0]
 		self.joinedChannels = []
 		self.ip = ip
+		self.userDomain = userDomain.split('.', 1)[1] if userDomain else glob.conf.config["server"]["server-domain"]
 		self.country = 0
 		self.location = [0,0]
 		self.awayMessage = ""
