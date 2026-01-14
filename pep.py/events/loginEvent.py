@@ -12,6 +12,7 @@ from helpers import chatHelper as chat
 from helpers import countryHelper
 from helpers import locationHelper
 from helpers import kotrikhelper
+from helpers import osuVersionHelper
 from objects import glob
 
 def handle(tornadoRequest):
@@ -31,9 +32,12 @@ def handle(tornadoRequest):
 	# 2:-3 thing is because requestData has some escape stuff that we don't need
 	loginData = str(tornadoRequest.request.body)[2:-3].split("\\n")
 	try:
+		# Try to get the ID from username
+		username = str(loginData[0])
+		userID = userUtils.getID(username)
+
 		# Make sure loginData is valid
-		if len(loginData) < 3:
-			raise exceptions.invalidArgumentsException()
+		if len(loginData) < 3: raise exceptions.invalidArgumentsException()
 
 		# Get HWID, MAC address and more
 		# Structure (new line = "|", already split)
@@ -46,12 +50,8 @@ def handle(tornadoRequest):
 		osuVersion = splitData[0]
 		timeOffset = int(splitData[1])
 		clientData = splitData[3].split(":")[:5]
-		if len(clientData) < 4:
-			raise exceptions.forceUpdateException()
-
-		# Try to get the ID from username
-		username = str(loginData[0])
-		userID = userUtils.getID(username)
+		if len(clientData) < 4: raise exceptions.forceUpdateException()
+		if glob.conf.config["server"]["allow_old_clients"] == "0": osuVersionHelper.isNeedUpdate(osuVersion)
 
 		if not userID:
 			# Invalid username
@@ -181,7 +181,8 @@ def handle(tornadoRequest):
 		# b20190401.22f56c084ba339eefd9c7ca4335e246f80 = Ainu Aoba's Birthday Build
 		# b20191223.3 = Unknown Ainu build? (Taken from most users osuver in cookiezi.pw)
 		# b20190226.2 = hqOsu (hq-af)
-#		if glob.conf.extra["mode"]["anticheat"]:
+		#if glob.conf.extra["mode"]["anticheat"]:
+		if True:
 			# Ainu Client 2020 update
 			if tornadoRequest.request.headers.get("ainu") == "happy":
 				log.info(f"Account ID {userID} tried to use Debian Client 2020!")
@@ -350,8 +351,17 @@ def handle(tornadoRequest):
 		# User tried to log in from unknown IP
 		responseData += serverPackets.needVerification()
 	except exceptions.haxException:
+		log.error(f"exceptions.haxException 에러 일어남!\n```\n{sys.exc_info()}\n{traceback.format_exc()}```")
+	except exceptions.unknownClientException:
+		log.error(f"{requestIP} | {username} | Unknown Client ({osuVersion})")
+		responseTokenString = "invalid-request"
+		responseData += serverPackets.loginError()
+		responseData += serverPackets.notification(f"Error!\nUnknown osu!.exe client!\n{osuVersion}")
+	except exceptions.forceUpdateException:
 		# Using oldoldold client, we don't have client data. Force update.
 		# (we don't use enqueue because we don't have a token since login has failed)
+		log.warning(f"{requestIP} | {username} | client-too-old ({osuVersion})")
+		responseTokenString = "client-too-old"
 		responseData += serverPackets.forceUpdate()
 		responseData += serverPackets.notification("Hory shitto, your client is TOO old! Nice prehistory! Please turn update it from the settings!")
 	except: log.error(f"Unknown error!\n```\n{sys.exc_info()}\n{traceback.format_exc()}```")

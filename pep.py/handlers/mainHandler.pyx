@@ -206,8 +206,7 @@ class handler(requestsManager.asyncRequestHandler):
 					# Release processing lock
 					userToken.processingLock.release()
 					# Delete token if kicked
-					if userToken.kicked:
-						glob.tokens.deleteToken(userToken)
+					if userToken.kicked: glob.tokens.deleteToken(userToken)
 
 		if glob.outputRequestTime:
 			# End time

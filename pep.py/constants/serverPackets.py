@@ -4,43 +4,44 @@ from common.ripple import userUtils
 from constants import dataTypes
 from constants import packetIDs
 from constants import userRanks
+from constants import loginFailureReason
 from helpers import packetHelper
 from helpers import countryHelper
 from objects import glob
 
 """ Login errors packets """
 def loginFailed():
-	return packetHelper.buildPacket(packetIDs.server_userID, [[-1, dataTypes.SINT32]])
+	return packetHelper.buildPacket(packetIDs.server_userID, [[loginFailureReason.AUTHENTICATION_FAILED, dataTypes.SINT32]])
 
 def forceUpdate():
-	return packetHelper.buildPacket(packetIDs.server_userID, [[-2, dataTypes.SINT32]])
+	return packetHelper.buildPacket(packetIDs.server_userID, [[loginFailureReason.OLD_CLIENT, dataTypes.SINT32]])
 
 def loginBanned():
-	packets = packetHelper.buildPacket(packetIDs.server_userID, [[-1, dataTypes.SINT32]])
+	packets = packetHelper.buildPacket(packetIDs.server_userID, [[loginFailureReason.AUTHENTICATION_FAILED, dataTypes.SINT32]])
 	#packets += notification("You are banned! I don't know what did you do but you can appeal after one month since your ban by contacting Discord! (You can join by going to the website!)")
 	packets += notification("You are banned! Check Your Email. I don't know what did you do but you can appeal since your ban by contacting Discord! (You can join by going to the website!)")
 	return packets
 
 def loginLocked():
-	packets = packetHelper.buildPacket(packetIDs.server_userID, [[-1, dataTypes.SINT32]])
+	packets = packetHelper.buildPacket(packetIDs.server_userID, [[loginFailureReason.AUTHENTICATION_FAILED, dataTypes.SINT32]])
 	packets += notification("Well... Your account is locked but everything still in the website ya know? and uh... You can appeal us at Discord! (You can go to our website for the link!)")
 	return packets
 
 def loginError():
-	return packetHelper.buildPacket(packetIDs.server_userID, [[-5, dataTypes.SINT32]])
+	return packetHelper.buildPacket(packetIDs.server_userID, [[loginFailureReason.ERROR_OCCURRED, dataTypes.SINT32]])
 
 def loginCheats():
 	message = "You better quit cheating! >_< ~Aoba"
-	packets = packetHelper.buildPacket(packetIDs.server_userID, [[-1, dataTypes.SINT32]])
+	packets = packetHelper.buildPacket(packetIDs.server_userID, [[loginFailureReason.AUTHENTICATION_FAILED, dataTypes.SINT32]])
 	packets += packetHelper.buildPacket(0x69, [[message, dataTypes.STRING]])
 	packets += notification("Please... don't login with cheats client... Play on cheating server instead of cheating on our server. Thank you.")
 	return packets
 
 def needSupporter():
-	return packetHelper.buildPacket(packetIDs.server_userID, [[-6, dataTypes.SINT32]])
+	return packetHelper.buildPacket(packetIDs.server_userID, [[loginFailureReason.NEEDS_SUPPORTER, dataTypes.SINT32]])
 
 def needVerification():
-	return packetHelper.buildPacket(packetIDs.server_userID, [[-8, dataTypes.SINT32]])
+	return packetHelper.buildPacket(packetIDs.server_userID, [[loginFailureReason.REQUIRES_VERIFICATION, dataTypes.SINT32]])
 
 
 """ Login packets """
@@ -197,7 +198,7 @@ def userStats(userID, force = False):
 			[userToken.pp, dataTypes.UINT64]
 		])
 
-	log.warning("[userToken.pp, dataTypes.UINT64] = {}".format([userToken.pp, dataTypes.UINT64]))
+	log.warning(f"[userToken.pp, dataTypes.UINT64] = {[userToken.pp, dataTypes.UINT64]}")
 	return packetHelper.buildPacket(packetIDs.server_userStats,
 	[
 		[userID, dataTypes.UINT32],

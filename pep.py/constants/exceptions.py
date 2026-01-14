@@ -1,3 +1,6 @@
+class loginErrorException(Exception):
+	pass
+
 class loginFailedException(Exception):
 	pass
 
@@ -86,6 +89,9 @@ class loginCheatClientsException(Exception):
 	pass
 
 class loginLockedException(Exception):
+	pass
+
+class unknownClientException(Exception):
 	pass
 
 class unknownStreamException(Exception):

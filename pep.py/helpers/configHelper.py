@@ -61,6 +61,7 @@ class config:
 			parsedConfig.get("server", "deltaurl")
 			parsedConfig.get("server", "publicdelta")
 			parsedConfig.get("server", "server-domain")
+			parsedConfig.get("server", "allow_old_clients")
 
 			parsedConfig.get("osu", "apikey")
 			parsedConfig.get("osu", "bancho_username")
@@ -135,6 +136,7 @@ class config:
 		self.config.set("server", "deltaurl", "delta.ppy.sh")
 		self.config.set("server", "publicdelta", "0")
 		self.config.set("server", "server-domain", "redstar.moe")
+		self.config.set("server", "allow_old_clients", "0")
 
 		self.config.add_section("osu")
 		self.config.set("osu", "apikey", "Your_osu_API_KEY")
