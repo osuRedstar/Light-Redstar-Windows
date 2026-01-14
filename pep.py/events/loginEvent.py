@@ -116,10 +116,10 @@ def handle(tornadoRequest):
 
 		#osu.ppy.sh 인증서 방식으로 접근하는 유저 구분
 		server_domain = glob.conf.config["server"]["server-domain"]
-		if server_domain in tornadoRequest.request.host: clmsg = None
-		elif "ppy.sh" in tornadoRequest.request.host: clmsg = "We recommend the -devserver option rather than using the certificate method."; log.warning(f"{username} ({userID}) | {clmsg}")
-		elif "akatsuki.gg" in tornadoRequest.request.host: clmsg = "akatsuki_patcher.exe Detected!"; log.warning(f"{username} ({userID}) | {clmsg}")
-		else: clmsg = f"Which [https://{tornadoRequest.request.host.split('.', 1)[1]} Domain] did you access this server from? Our Server Domain is [https://{server_domain} {server_domain}]"; log.error(f"{username} ({userID}) | {clmsg}")
+		if server_domain == responseToken.userDomain: clmsg = None
+		elif "ppy.sh" == responseToken.userDomain: clmsg = "We recommend the -devserver option rather than using the certificate method."; log.warning(f"{username} ({userID}) | {clmsg}")
+		elif "akatsuki.gg" == responseToken.userDomain: clmsg = "akatsuki_patcher.exe Detected!"; log.warning(f"{username} ({userID}) | {clmsg}")
+		else: clmsg = f"Which [https://{responseToken.userDomain} Domain] did you access this server from? Our Server Domain is [https://{server_domain} {server_domain}]"; log.error(f"{username} ({userID}) | {clmsg}")
 		if clmsg:
 			glob.streams.broadcast("main", serverPackets.notification(clmsg))
 			glob.streams.broadcast("main", serverPackets.notification(f"-devserver {server_domain}"))
