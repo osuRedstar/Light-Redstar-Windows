@@ -111,15 +111,13 @@ def getSystemInfo():
 	else: data["cpuName"] = os.popen("lscpu | grep 'Model name:'").read().split(" ")[-4]
 
 	data["uptime"] = "{}d {}h {}m {}s".format(days, hours, minutes, seconds)
-	data["cpuUsage"] = psutil.cpu_percent()
+	data["cpuUsage"] = psutil.cpu_percent(interval=0.1)
 	memory = psutil.virtual_memory()
 	data["totalMemory"] = "{0:.2f}".format(memory.total/1074000000)
-	#data["usedMemory"] = "{0:.2f}".format(memory.active/1074000000)
-	data["usedMemory"] = "{0:.2f}".format(memory.used/1074000000)
-	data["memoryUsage"] = round(float(data["usedMemory"]) / float(data["totalMemory"]) * 100, 1)
+	data["usedMemory"] = "{0:.2f}".format(memory.used/1074000000) #data["usedMemory"] = "{0:.2f}".format(memory.active/1074000000)
+	data["memoryUsage"] = memory.percent #data["memoryUsage"] = round(float(data["usedMemory"]) / float(data["totalMemory"]) * 100, 1)
 
 	# Unix only stats
-	if data["unix"]: data["loadAverage"] = os.getloadavg()
-	else: data["loadAverage"] = (0,0,0)
+	data["loadAverage"] = os.getloadavg() if data["unix"] else (0,0,0)
 
 	return data
