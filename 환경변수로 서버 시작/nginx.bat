@@ -1,7 +1,7 @@
 @echo off
 
 title nginx
-B:
-cd B:\redstar\nginx
+C:
+cd C:\nginx
 nginx.exe
 pause
