@@ -16,5 +16,6 @@
 *.youtube11.info (250414) ~ (260414) dynadot.com
 *.jakadsmania.com (251008) dynadot.com
 *.jakadsmania.info (251008) ~ (261008) dynadot.com
-*.nanokvm.ch (251209) dynadot.com
+*.nanokvm.ch (251209) ~ (260220) dynadot.com domainabuse@nic.ch 할당취소
 *.youtu11.be (251209) dynadot.com
+*.tunnels.cfd (260418) dynadot.com
