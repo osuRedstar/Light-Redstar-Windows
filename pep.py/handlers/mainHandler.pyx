@@ -1,8 +1,4 @@
-import datetime
-import gzip
-import os
-import sys
-import traceback
+import datetime, gzip, os, sys, traceback, subprocess
 
 import tornado.gen
 import tornado.web
@@ -10,9 +6,10 @@ from raven.contrib.tornado import SentryMixin
 
 from common.log import logUtils as log
 from common.web import requestsManager
-from constants import exceptions
-from constants import packetIDs
-from constants import serverPackets
+from common.sentry import sentry
+from constants import exceptions, packetIDs, serverPackets
+from helpers import packetHelper
+from objects import glob
 from events import cantSpectateEvent
 from events import changeActionEvent
 from events import changeMatchModsEvent
@@ -55,9 +52,6 @@ from events import userStatsRequestEvent
 from events import tournamentMatchInfoRequestEvent
 from events import tournamentJoinMatchChannelEvent
 from events import tournamentLeaveMatchChannelEvent
-from helpers import packetHelper
-from objects import glob
-from common.sentry import sentry
 
 class handler(requestsManager.asyncRequestHandler):
 	@tornado.web.asynchronous
@@ -244,9 +238,11 @@ class handler(requestsManager.asyncRequestHandler):
 		#html += "<iframe src='https://ghostbin.co/paste/bwe8z' style='position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;'></iframe>"
 		#Yes. I just wrote the credit... in it.
 
-		#Windows need WSL & winfetch + aha.exe | Linux need neofetch + aha
-		neofetch = os.popen('powershell -Command "(winfetch | aha -n); (wsl neofetch | aha -n)"') if os.name == "nt" else os.popen('neofetch | aha -n')
-		neofetch = neofetch.buffer.read().decode('utf-8', errors='ignore')
+		#Windows need WSL & fastfetch.exe + aha.exe | Linux need fastfetch + aha
+		if os.name != "nt": neofetch = subprocess.getoutput("fastfetch -c fastfetchConfig.json | aha -n")
+		else:
+			tasks = [subprocess.Popen(c, shell=True, stdout=subprocess.PIPE, encoding='utf-8', errors='ignore') for c in ['fastfetch.exe --logo windows -c fastfetchConfig.json | aha -n', 'wsl fastfetch -c fastfetchConfig.json | aha -n']]
+			neofetch = '\n'.join(t.communicate()[0] for t in tasks)
 
 		html += '''
 		<meta charset="UTF-8">
