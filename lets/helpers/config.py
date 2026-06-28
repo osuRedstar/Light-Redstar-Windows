@@ -66,6 +66,7 @@ class config:
 			self.config.get("server", "beatmapspath")
 			self.config.get("server", "screenshotspath")
 			self.config.get("server", "server-domain")
+			self.config.get("server", "allow_nvidia_gamma_submit")
 
 			self.config.get("sentry", "enable")
 			self.config.get("sentry", "dsn")
@@ -133,6 +134,7 @@ class config:
 		self.config.set("server", "beatmapspath", ".data/beatmaps")
 		self.config.set("server", "screenshotspath", ".data/screenshots")
 		self.config.set("server", "server-domain", "redstar.moe")
+		self.config.set("server", "allow_nvidia_gamma_submit", "True")
 
 		self.config.add_section("sentry")
 		self.config.set("sentry", "enable", "False")

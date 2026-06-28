@@ -21,6 +21,11 @@ class noBanchoSessionException(Exception):
 	def __init__(self, handler, who, ip):
 		log.warning("{handler} - {username} has tried to submit a score from {ip} without an active bancho session from that ip. If this happens often, {username} is trying to use a score submitter.".format(handler=handler, ip=ip, username=who), "bunker")
 
+class forceUpdateException(Exception):
+	def __init__(self, handler, who, whoID, ip, isNvidiaGamma=False):
+		if isNvidiaGamma: log.warning(f"{handler} - {who}({whoID}) has tried to submit a score from {ip} with Nvidia Gamma < 0.6")
+		else: log.warning(f"{handler} - {who}({whoID}) has tried to submit a score from {ip} with Old Client")
+
 class osuApiFailException(Exception):
 	def __init__(self, handler):
 		log.warning("{} - Invalid data from osu!api".format(handler))

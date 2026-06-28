@@ -81,6 +81,7 @@ class handler(requestsManager.asyncRequestHandler):
 			password = self.get_argument("pass")
 			isX = self.get_argument("x")
 			ip = self.getRequestIP()
+			token = self.get_argument("token")
 
 			# Get bmk and bml (notepad hack check)
 			if "bmk" in self.request.arguments and "bml" in self.request.arguments:
@@ -122,8 +123,12 @@ class handler(requestsManager.asyncRequestHandler):
 			# User exists check
 			if userID == 0:
 				raise exceptions.loginFailedException(MODULE_NAME, userID)
+
+			if not glob.conf.config.getboolean("server", "allow_nvidia_gamma_submit") and not token:
+				log.debug(f"{ip} | {username}({userID}) Detected Nvidia Gamma < 0.6")
+				raise exceptions.forceUpdateException(MODULE_NAME, username, userID, ip, isNvidiaGamma=True)
 				
-			 # Score submission lock check
+			# Score submission lock check
 			lock_key = "lets:score_submission_lock:{}:{}:{}".format(userID, scoreData[0], int(scoreData[9]))
 			if glob.redis.get(lock_key) is not None:
 				# The same score score is being submitted and it's taking a lot
@@ -511,7 +516,7 @@ class handler(requestsManager.asyncRequestHandler):
 						f.write(replay)
 					
 					# Send to cono ALL passed replays, even non high-scores
-					if glob.conf.config["cono"]["enable"]:
+					if glob.conf.config.getboolean("cono", "enable"): #if glob.conf.config["cono"]["enable"]:
 						# We run this in a separate thread to avoid slowing down scores submission,
 						# as cono needs a full replay
 						threading.Thread(target=lambda: glob.redis.publish(
@@ -548,7 +553,7 @@ class handler(requestsManager.asyncRequestHandler):
 						f.write(replay)
 					
 					# Send to cono ALL passed replays, even non high-scores
-					if glob.conf.config["cono"]["enable"]:
+					if glob.conf.config.getboolean("cono", "enable"): #if glob.conf.config["cono"]["enable"]:
 						# We run this in a separate thread to avoid slowing down scores submission,
 						# as cono needs a full replay
 						threading.Thread(target=lambda: glob.redis.publish(
@@ -585,7 +590,7 @@ class handler(requestsManager.asyncRequestHandler):
 						f.write(replay)
 
 					# Send to cono ALL passed replays, even non high-scores
-					if glob.conf.config["cono"]["enable"]:
+					if glob.conf.config.getboolean("cono", "enable"): #if glob.conf.config["cono"]["enable"]:
 						# We run this in a separate thread to avoid slowing down scores submission,
 						# as cono needs a full replay
 						threading.Thread(target=lambda: glob.redis.publish(
@@ -1056,6 +1061,7 @@ class handler(requestsManager.asyncRequestHandler):
 			# We only log through schiavo atm (see exceptions.py).
 			self.set_status(408)
 			self.write("error: pass")
+		except exceptions.forceUpdateException: self.write("error: oldver")
 		except:
 			# Try except block to avoid more errors
 			try:
