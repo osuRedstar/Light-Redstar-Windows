@@ -166,7 +166,7 @@ class config:
 		self.config.set("discord", "rxscore", "")
 
 		self.config.add_section("cono")
-		self.config.set("cono", "enable", "False")
+		self.config.set("cono", "enable", "True")
 
 		self.config.add_section("custom")
 		self.config.set("custom", "config", "common/config.json")
