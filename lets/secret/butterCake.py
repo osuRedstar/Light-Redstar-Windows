@@ -63,7 +63,7 @@ def bake(submit, score):
 			aeskey = "h89f2-890h2h89b34g-h80g134n90133"
 		iv = submit.get_argument("iv")
 
-		score_data = aeshelper.decryptRinjdael(aeskey, iv, submit.get_argument("score"), True).split(":")
+		score_data = aeshelper.decryptRijndael(aeskey, iv, submit.get_argument("score"), True).split(":")
 		username = score_data[1].strip()
 
 		user_id = userUtils.getID(username)
@@ -75,7 +75,7 @@ def bake(submit, score):
 		flags = score_data[17].count(' ')
 
 		try:
-			pl = aeshelper.decryptRinjdael(aeskey, iv, submit.get_argument("pl"), True).split("\r\n")
+			pl = aeshelper.decryptRijndael(aeskey, iv, submit.get_argument("pl"), True).split("\r\n")
 		except:
 			police.call("Unable to decrypt process list from USERNAME()", user_id=user_id)
 			detected.append({

@@ -3,7 +3,7 @@ from py3rijndael import Pkcs7Padding
 from py3rijndael import RijndaelCbc
 from base64 import b64decode, b64encode
 
-def decryptRinjdael(aeskey: str, iv: str, data: str, areBase64: bool=False) -> str:
+def decryptRijndael(aeskey: str, iv: str, data: str, areBase64: bool=False) -> str:
     """
 	Where the magic happens
 
@@ -20,7 +20,7 @@ def decryptRinjdael(aeskey: str, iv: str, data: str, areBase64: bool=False) -> s
     )
     return aes.decrypt(b64decode(data)).decode("utf-8") if areBase64 else aes.decrypt(data).decode("utf-8")
 
-def encryptRinjdael(aeskey: str, iv: str, data: str, areBase64: bool=False) -> str:
+def encryptRijndael(aeskey: str, iv: str, data: str, areBase64: bool=False) -> str:
     """
 	AES CBC 모드로 데이터를 암호화하는 함수
 

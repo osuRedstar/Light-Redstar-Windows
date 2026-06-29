@@ -99,14 +99,14 @@ class handler(requestsManager.asyncRequestHandler):
 
 			# Get score data
 			log.debug("Decrypting score data...")
-			scoreData = aeshelper.decryptRinjdael(aeskey, iv, scoreDataEnc, True).split(":")
+			scoreData = aeshelper.decryptRijndael(aeskey, iv, scoreDataEnc, True).split(":")
 
 			try:
 				log.debug2(scoreData)
-				osu_client_hash = aeshelper.decryptRinjdael(aeskey, iv, self.get_argument("s"), True) #client_hash_b64 --> decode
+				osu_client_hash = aeshelper.decryptRijndael(aeskey, iv, self.get_argument("s"), True) #client_hash_b64 --> decode
 				coc = aeshelper.compute_online_checksum(scoreData, osu_client_hash, self.get_argument("sbk", ""))
 				log.debug2(f"scoreData[2] == coc = {scoreData[2] == coc}\n{coc}")
-				aes_new = aeshelper.encryptRinjdael(aeskey, iv, ":".join(scoreData), True)
+				aes_new = aeshelper.encryptRijndael(aeskey, iv, ":".join(scoreData), True)
 				log.debug2(f"scoreDataEnc == aes_new = {scoreDataEnc == aes_new}\n{aes_new}")
 				time_obj = time.strptime(scoreData[16], '%y%m%d%H%M%S')
 				unixtime2 = int(time.mktime(time_obj) - time.timezone)
