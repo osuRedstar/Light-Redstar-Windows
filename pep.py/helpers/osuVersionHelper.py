@@ -38,7 +38,7 @@ def get_allowed_client_versions(osu_stream: str) -> set:
     if osu_stream in ("stable", "beta"):  osu_stream += "40"  # i wonder why this exists
 
     osuallowver = set()
-    for b in requests.get(f"https://osu.ppy.sh/api/v2/changelog?stream={osu_stream}").json()["builds"]:
+    for b in requests.get(f"https://osu.ppy.sh/api/v2/changelog?stream={osu_stream}", auth=('', '')).json()["builds"]:
         version = datetime.date(
             int(b["version"][0:4]),
             int(b["version"][4:6]),
